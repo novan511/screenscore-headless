@@ -24,6 +24,10 @@ export function stripTags(html: string): string {
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#8211;/g, "–")
+    // Curly quotes and other numeric entities stay literal otherwise — the
+    // excerpt would render as "&#8220;text&#8221;" once React escapes it.
+    .replace(/&#x([0-9a-f]+);/gi, (_, n: string) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCharCode(Number(n)))
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -67,6 +71,92 @@ export function sanitizeWpHtml(html: string, maxLength = 20000): string {
     if (tag.startsWith("</")) return `</${name}>`;
     if (name === "br") return "<br/>";
     if (name === "hr") return "<hr/>";
+    return `<${name}>`;
+  });
+
+  return cleaned.length > maxLength
+    ? cleaned.slice(0, maxLength) + "…"
+    : cleaned;
+}
+
+/* ---------------------------------------------------------------------------
+ * Article body sanitizer — blog posts keep links and images, everything else
+ * follows the same whitelist philosophy as sanitizeWpHtml.
+ * ------------------------------------------------------------------------- */
+
+const ARTICLE_TAGS = new Set([
+  ...SAFE_TAGS,
+  "a", "img", "code", "pre", "figure", "figcaption",
+]);
+
+const SAFE_URL = /^(https?:\/\/|\/(?!\/)|#)/i;
+const IMG_URL = /^https?:\/\//i;
+
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function safeHref(raw: string): string | null {
+  const v = raw.trim();
+  // Reject javascript:, data:, protocol-relative //host, and control chars.
+  if (!SAFE_URL.test(v) || /[\u0000-\u001f]/.test(v)) return null;
+  return v;
+}
+
+function safeImgSrc(raw: string): string | null {
+  const v = raw.trim();
+  if (!IMG_URL.test(v) || /[\u0000-\u001f]/.test(v)) return null;
+  return v;
+}
+
+/**
+ * Sanitized HTML for long-form articles: like sanitizeWpHtml, but `a[href]`
+ * and `img[src|alt|loading]` survive with protocol-checked values so the
+ * whitelisted tags are still safe against XSS.
+ */
+export function sanitizeArticleHtml(html: string, maxLength = 120000): string {
+  const decoded = decodeEntities(html);
+
+  const cleaned = decoded.replace(/<[^>]*>/g, (tag) => {
+    const m = tag.match(/^<\/?([a-z0-9]+)((?:[^>"']|"[^"]*"|'[^']*')*)(\/?)>$/i);
+    if (!m) return "";
+    const name = m[1].toLowerCase();
+    if (!ARTICLE_TAGS.has(name)) return "";
+    if (tag.startsWith("</")) return `</${name}>`;
+    if (name === "br") return "<br/>";
+    if (name === "hr") return "<hr/>";
+
+    // Collect attributes (values may be quoted or bare).
+    const attrs: Record<string, string> = {};
+    const attrRe = /([a-zA-Z][a-zA-Z0-9-]*)\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
+    let am: RegExpExecArray | null;
+    while ((am = attrRe.exec(m[2] ?? "")) !== null) {
+      const key = am[1].toLowerCase();
+      const value = am[3] ?? am[4] ?? am[5] ?? "";
+      attrs[key] = value;
+    }
+
+    if (name === "a") {
+      const href = attrs.href ? safeHref(attrs.href) : null;
+      if (!href) return ""; // drop the tag, keep inner text
+      const external = /^https?:\/\//i.test(href);
+      const rel = external ? ' rel="noopener noreferrer"' : "";
+      return `<a href="${escapeAttr(href)}"${rel}>`;
+    }
+
+    if (name === "img") {
+      const src = attrs.src ? safeImgSrc(attrs.src) : null;
+      if (!src) return "";
+      const alt = attrs.alt ? ` alt="${escapeAttr(attrs.alt)}"` : ' alt=""';
+      const loading =
+        attrs.loading === "eager" ? "eager" : "lazy";
+      return `<img src="${escapeAttr(src)}"${alt} loading="${loading}"/>`;
+    }
+
     return `<${name}>`;
   });
 

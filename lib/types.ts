@@ -41,6 +41,12 @@ export interface Title {
   excerpt?: string;
 }
 
+/** Embedded trailer pulled from the WordPress page (Elementor video widget). */
+export interface Trailer {
+  provider: "youtube";
+  id: string;
+}
+
 export interface Paged<T> {
   items: T[];
   page: number;

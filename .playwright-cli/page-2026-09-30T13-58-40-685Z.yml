@@ -1,0 +1,69 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "screenscore" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Film" [ref=e6] [cursor=pointer]:
+          - /url: /films
+        - link "Serial" [ref=e7] [cursor=pointer]:
+          - /url: /series
+        - link "E-Books" [ref=e8] [cursor=pointer]:
+          - /url: /e-books
+        - link "Game" [ref=e9] [cursor=pointer]:
+          - /url: /game
+        - link "Aplikasi" [ref=e10] [cursor=pointer]:
+          - /url: /aplikasi
+        - link "Orang" [ref=e11] [cursor=pointer]:
+          - /url: /cast
+        - link "Tentang" [ref=e12] [cursor=pointer]:
+          - /url: /tentang-kami
+      - search [ref=e14]:
+        - text: Cari judul
+        - searchbox "Cari judul Cari judul" [ref=e15]
+      - group [ref=e16]:
+        - generic "Menu" [ref=e17]: ☰Menu
+  - main [ref=e18]:
+    - generic [ref=e19]: Memuat Film…
+  - contentinfo [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]: screenscore
+        - paragraph [ref=e25]: Review konten terbaik untuk anak. Kurasi jujur dari orang tua, untuk tontonan dan mainan yang aman bagi anak.
+      - generic [ref=e26]:
+        - heading "Kategori" [level=3] [ref=e27]
+        - list [ref=e28]:
+          - listitem [ref=e29]:
+            - link "Film" [ref=e30] [cursor=pointer]:
+              - /url: /films
+          - listitem [ref=e31]:
+            - link "Serial" [ref=e32] [cursor=pointer]:
+              - /url: /series
+          - listitem [ref=e33]:
+            - link "E-Books" [ref=e34] [cursor=pointer]:
+              - /url: /e-books
+          - listitem [ref=e35]:
+            - link "Game" [ref=e36] [cursor=pointer]:
+              - /url: /game
+          - listitem [ref=e37]:
+            - link "Aplikasi" [ref=e38] [cursor=pointer]:
+              - /url: /aplikasi
+      - generic [ref=e39]:
+        - heading "Lainnya" [level=3] [ref=e40]
+        - list [ref=e41]:
+          - listitem [ref=e42]:
+            - link "Tentang Kami" [ref=e43] [cursor=pointer]:
+              - /url: /tentang-kami
+          - listitem [ref=e44]:
+            - link "Kontak" [ref=e45] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=e46]:
+            - link "Ajukan Judul" [ref=e47] [cursor=pointer]:
+              - /url: /ajukan-judul-baru
+          - listitem [ref=e48]:
+            - link "Ketentuan Layanan" [ref=e49] [cursor=pointer]:
+              - /url: /ketentuan-layanan-screenscore
+          - listitem [ref=e50]:
+            - link "Privasi" [ref=e51] [cursor=pointer]:
+              - /url: /privacy-policy
+    - generic [ref=e52]: © 2026 ScreenScore — WordPress headless + Next.js

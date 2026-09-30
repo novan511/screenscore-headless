@@ -3,7 +3,7 @@ import { cache } from "react";
 import { WP_SITE } from "./config";
 import { isUpstreamError, loadWpHtml } from "./http";
 import { decodeEntities } from "./utils";
-import type { PersonKind, ScreenScore, SeoMeta } from "./types";
+import type { PersonKind, ScreenScore, SeoMeta, Trailer } from "./types";
 
 /**
  * HTML bridge for data that WordPress does not expose headless yet:
@@ -108,6 +108,65 @@ export async function fetchScreenScore(permalink: string): Promise<ScreenScore |
   } catch {
     return null;
   }
+}
+
+/**
+ * Trailer URL for film/series pages. WordPress stores it in an Elementor
+ * video widget inside the post content (no ACF/REST field exists), so it is
+ * scraped from the same rendered page the SEO/score bridges already share
+ * through `loadWpHtml` — one download per request feeds all three.
+ */
+export const fetchTrailer = cache(
+  async (permalink: string): Promise<Trailer | null> => {
+    try {
+      const html = await loadWpHtml(permalink);
+      return html ? parseTrailer(html) : null;
+    } catch {
+      // A missing trailer is normal — never fail the page over it.
+      return null;
+    }
+  },
+);
+
+function parseTrailer(html: string): Trailer | null {
+  const root = parse(html);
+
+  // 1. Elementor video widget: data-settings carries the YouTube URL.
+  for (const widget of root.querySelectorAll(".elementor-widget-video")) {
+    const raw = widget.getAttribute("data-settings");
+    if (!raw) continue;
+    const settings = safeJson(raw) ?? safeJson(decodeEntities(raw));
+    const url = settings?.youtube_url;
+    if (typeof url === "string") {
+      const id = youtubeId(url);
+      if (id) return { provider: "youtube", id };
+    }
+  }
+
+  // 2. Fallback: a YouTube link inside the post content (classic embeds).
+  const content =
+    root.querySelector(".entry-content, article")?.innerHTML ?? "";
+  const match = content.match(
+    /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/,
+  );
+  return match ? { provider: "youtube", id: match[1] } : null;
+}
+
+function safeJson(text: string): Record<string, unknown> | null {
+  try {
+    const value: unknown = JSON.parse(text);
+    return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Accepts full watch/short/embed URLs; returns the 11-char video id. */
+function youtubeId(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  return match ? match[1] : null;
 }
 
 /** Biography pages: pull text out of Elementor text-editor widgets. */

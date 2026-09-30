@@ -13,6 +13,7 @@ const SITEMAP_FETCH_TTL = 86400;
 
 const STATIC_PATHS = [
   "",
+  "/blog",
   "/tentang-kami",
   "/contact",
   "/ajukan-judul-baru",
@@ -56,6 +57,35 @@ const PEOPLE_FIELD = {
   character: "characters",
   song: "songs",
 } as const;
+
+/**
+ * Newest articles (two batches of 100) — the deep archive stays reachable
+ * through /blog pagination, so the sitemap only advertises the fresh head.
+ */
+async function fetchBlogPosts(): Promise<{ path: string; modified: string }[]> {
+  const out: { path: string; modified: string }[] = [];
+  for (let page = 1; page <= 2; page++) {
+    try {
+      const res = await wpFetch(
+        `${ENDPOINTS.wp}/posts?per_page=${BATCH}&page=${page}&orderby=date&order=desc&_fields=slug,modified`,
+        { revalidate: SITEMAP_FETCH_TTL },
+      );
+      if (!res.ok) break;
+      const rows = (await res.json()) as { slug: string; modified: string }[];
+      if (!rows.length) break;
+      out.push(
+        ...rows.map((r) => ({
+          path: `/blog/${r.slug}`,
+          modified: r.modified,
+        })),
+      );
+      if (rows.length < BATCH) break;
+    } catch {
+      break;
+    }
+  }
+  return out;
+}
 
 /** Cursor-paginated people/characters/songs — `uri` carries the real path. */
 async function fetchPeoplePaths(
@@ -116,13 +146,14 @@ async function fetchPeoplePaths(
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const [productPaths, castPaths, creatorPaths, characterPaths, songPaths] =
+  const [productPaths, castPaths, creatorPaths, characterPaths, songPaths, blogPosts] =
     await Promise.all([
       fetchProductPaths(),
       fetchPeoplePaths(PEOPLE_FIELD.cast),
       fetchPeoplePaths(PEOPLE_FIELD.creator),
       fetchPeoplePaths(PEOPLE_FIELD.character),
       fetchPeoplePaths(PEOPLE_FIELD.song),
+      fetchBlogPosts(),
     ]);
 
   const statics: MetadataRoute.Sitemap = STATIC_PATHS.map((p) => ({
@@ -157,5 +188,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
-  return [...statics, ...categories, ...content, ...peopleEntries];
+  const articles: MetadataRoute.Sitemap = blogPosts.map(({ path, modified }) => ({
+    url: siteUrl(path),
+    lastModified: new Date(modified),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...statics, ...categories, ...content, ...peopleEntries, ...articles];
 }

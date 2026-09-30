@@ -84,7 +84,8 @@ Sisa waktu render dingin (1,8–3,5 detik, sekali per URL) sepenuhnya berasal da
 /                           hero + rails + pencarian + filter usia
 /films /series /e-books /game /aplikasi
                             arsip per kategori (?page=2&age=<tag>)
-/content/[slug]             detail judul + Screen Score + sinopsis + terkait
+/content/[slug]             detail judul: hero sinema + Screen Score + trailer (film/serial) + artikel + review member + terkait
+/api/reviews                proxy reviewflow: GET gate (login/form/already) + POST submit (admin-ajax, teruskan Cookie member)
 /search?q=                  judul (REST) + orang (GraphQL)
 /cast, /cast/[slug]         daftar & detail pemeran
 /characters, /character/[…] karakter (URL hierarkis ikut WP: marvel/carnage)
@@ -103,7 +104,16 @@ brand ScreenScore:
 - Tipografi: **Plus Jakarta Sans** (via `next/font`)
 - Momen signature: **ScorePanel** di halaman detail — kotak skor kuning ala IMDb
   + breakdown 6 dimensi (Pesan Positif, Kekerasan, Merokok/Alkohol/Narkoba,
-  Dialog Kasar, Adegan Seksual, Keberagaman)
+  Dialog Kasar, Adegan Seksual, Keberagaman), **menumpuk di tepi hero gelap**
+  sebagai jembatan ke area baca terang
+- **Hero detail**: pita full-bleed `ink` dengan poster & backdrop blur, chip
+  kategori/tahun/usia, chip skor kuning, CTA "Putar Trailer / Baca Review"
+- **Trailer (film & serial)**: facade klik-main dari YouTube — thumbnail dulu,
+  iframe `youtube-nocookie` hanya setelah diklik (`components/TrailerPlayer.tsx`);
+  URL diambil dari widget video Elementor di halaman WP (`fetchTrailer` di bridge)
+- **Artikel** (`lib/article.ts` + `.article-prose` di globals.css): judul bagian
+  WP yang berupa paragraf pendek dipromosikan jadi `<h2>` ber-anchor, daftar
+  "Label: nilai" jadi kartu fakta, muncul Daftar Isi bila ≥3 judul
 
 ## Komponen kunci
 
@@ -117,7 +127,13 @@ components/        Hero, Rail, PosterCard, ScorePanel, AgeChips, Pagination…
 
 ## Yang belum (roadmap)
 
-- Tulis review dari Next.js (saal ini form WP masih di backend)
+- **Review member**: tulis-review sudah jalan lewat `/api/reviews` (proxy ke
+  `reviewflow_submit`; gate & nonce diambil dari halaman WP dengan Cookie
+  member — penuh hanya setelah frontend mengambil alih domain). Daftar review
+  approved membaca `GET /wp-json/rf/v1/reviews?post_id=` — **snippet PHP-nya
+  belum dipasang di plugin** (butuh source plugin untuk schema penyimpanan).
+  Jalur member belum bisa diuji di localhost (cookie WP tidak ada) — uji di
+  domain asli.
 - Filmografi cast (tabel relasi `cast` di product masih kosong di WP)
 - Endpoint REST resmi untuk reviewflow (ganti HTML bridge)
 - Meilisearch untuk pencarian instan

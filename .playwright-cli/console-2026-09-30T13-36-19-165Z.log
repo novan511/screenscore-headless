@@ -1,0 +1,16 @@
+[   10866ms] [ERROR] Failed to load resource: the server responded with a status of 504 (Gateway Timeout) @ http://localhost:3100/_next/image?url=https%3A%2F%2Fscreenscore.digitalmama.id%2Fwp-content%2Fuploads%2F2026%2F08%2Fimages-2026-09-12T153058.597_result.webp&w=256&q=70:0
+[  153499ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3100/content/anora?_rsc=1p-R_iEY6bj0jY31:0
+[  153501ms] [ERROR] Failed to fetch RSC payload for http://localhost:3100/content/anora. Falling back to browser navigation. TypeError: Failed to fetch
+    at y (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:40384)
+    at async _ (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:39242)
+    at async Object.o [as task] (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:172750) @ http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:0
+[  153506ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3100/content/the-odyssey?_rsc=1p-R_iEY6bj0jY31:0
+[  153506ms] [ERROR] Failed to fetch RSC payload for http://localhost:3100/content/the-odyssey. Falling back to browser navigation. TypeError: Failed to fetch
+    at y (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:40384)
+    at async _ (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:39242)
+    at async Object.o [as task] (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:172750) @ http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:0
+[  153506ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3100/content/widows-bay?_rsc=1p-R_iEY6bj0jY31:0
+[  153506ms] [ERROR] Failed to fetch RSC payload for http://localhost:3100/content/widows-bay. Falling back to browser navigation. TypeError: Failed to fetch
+    at y (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:40384)
+    at async _ (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:39242)
+    at async Object.o [as task] (http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:1:172750) @ http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:0

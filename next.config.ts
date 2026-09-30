@@ -16,10 +16,17 @@ const nextConfig: NextConfig = {
      * encodes of 3840px sources on first view.
      */
     deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1600, 1920, 2048, 2560],
+    // next/image warns for every quality not listed here (required in Next 16).
+    // 70 = cards/heroes, 55 = blurred hero backdrop, 75 = detail poster.
+    qualities: [55, 70, 75],
     remotePatterns: [
       { protocol: "https", hostname: "screenscore.digitalmama.id" },
       { protocol: "https", hostname: "**.wordpress.com" },
       { protocol: "https", hostname: "i0.wp.com" },
+      // Author avatars on article bylines.
+      { protocol: "https", hostname: "secure.gravatar.com" },
+      { protocol: "https", hostname: "www.gravatar.com" },
+      { protocol: "https", hostname: "gravatar.com" },
     ],
   },
   // Keep tracing inside the app even when a parent folder has a lockfile.
@@ -35,7 +42,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path(films|series|game|e-books|aplikasi|search)",
+        source: "/:path(films|series|game|e-books|aplikasi|search|blog)",
         headers: [
           {
             key: "Cache-Control",

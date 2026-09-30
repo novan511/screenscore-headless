@@ -69,7 +69,7 @@ export async function ArchiveView({
         page={data.page}
         totalPages={data.totalPages}
         basePath={category.path}
-        age={age}
+        query={age ? { age } : {}}
       />
     </div>
   );

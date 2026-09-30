@@ -1,11 +1,7 @@
-import { cx } from "@/lib/utils";
-
 export function SearchForm({
-  dark = false,
   autoFocus = false,
   defaultValue = "",
 }: {
-  dark?: boolean;
   autoFocus?: boolean;
   defaultValue?: string;
 }) {
@@ -22,12 +18,7 @@ export function SearchForm({
         defaultValue={defaultValue}
         autoFocus={autoFocus}
         placeholder="Cari film, game, e-book…"
-        className={cx(
-          "w-full rounded-full px-4 py-2 text-sm font-medium placeholder:font-normal",
-          dark
-            ? "bg-ink-3 text-white placeholder:text-white/50 focus:bg-ink-3"
-            : "bg-surface text-ink placeholder:text-muted",
-        )}
+        className="w-full rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-ink placeholder:font-normal placeholder:text-muted focus:border-pink"
       />
     </form>
   );

@@ -1,0 +1,11 @@
+[     127ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/css/e513734e98fb111d.css:0
+[     186ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/webpack-a4f9a13051ce0445.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/4bd1b696-c023c6e3521b1417.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/255-2dbbf79f36f0dfa2.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/main-app-b3cdf7c1c17dc128.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/619-ba102abea3e3d0e4.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/app/layout-d3447626678b60a6.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/356-1744fa8fcd95155f.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/app/films/page-6d665b512be9ace8.js:0
+[     187ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3100/_next/static/chunks/app/error-adeabe70923b765d.js:0
+[    3307ms] [WARNING] The resource http://localhost:3100/_next/static/media/636a5ac981f94f8b-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3100/films?age=balita-1-5-tahun:0

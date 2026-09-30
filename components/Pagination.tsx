@@ -5,18 +5,21 @@ export function Pagination({
   page,
   totalPages,
   basePath,
-  age,
+  query = {},
 }: {
   page: number;
   totalPages: number;
   basePath: string;
-  age?: string;
+  /** Extra query params preserved across pages (e.g. { age } or { cat }). */
+  query?: Record<string, string>;
 }) {
   if (totalPages <= 1) return null;
   const hrefFor = (p: number) => {
     const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(query)) {
+      if (v) params.set(k, v);
+    }
     if (p > 1) params.set("page", String(p));
-    if (age) params.set("age", age);
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
   };

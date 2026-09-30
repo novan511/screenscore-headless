@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { fetchStaticPage } from "@/lib/graphql";
 import { ignoreMissing, isUpstreamError } from "@/lib/http";
 import { fetchPageSeo } from "@/lib/bridge";
+import { fetchPostDetail } from "@/lib/blog";
 import { sanitizeWpHtml } from "@/lib/utils";
 import { SITE } from "@/lib/config";
 
@@ -67,7 +68,16 @@ export default async function StaticPage({ params }: Props) {
     if (isUpstreamError(err)) throw err;
     page = null;
   }
-  if (!page) notFound();
+  if (!page) {
+    // Legacy post permalinks live at the WP root — keep those URLs working
+    // (308) by sending them to their new home under /blog.
+    const post = await fetchPostDetail(slug).catch((err) => {
+      if (isUpstreamError(err)) throw err;
+      return null;
+    });
+    if (post) permanentRedirect(post.path);
+    notFound();
+  }
 
   return (
     <div className="mx-auto max-w-[860px] px-4 py-12 sm:px-6">

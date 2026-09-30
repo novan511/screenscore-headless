@@ -1,0 +1,513 @@
+- generic [ref=f8e1]:
+  - banner [ref=f8e2]:
+    - generic [ref=f8e4]:
+      - link "screenscore" [ref=f8e5] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=f8e6]:
+        - link "Film" [ref=f8e7] [cursor=pointer]:
+          - /url: /films
+        - link "Serial" [ref=f8e8] [cursor=pointer]:
+          - /url: /series
+        - link "E-Books" [ref=f8e9] [cursor=pointer]:
+          - /url: /e-books
+        - link "Game" [ref=f8e10] [cursor=pointer]:
+          - /url: /game
+        - link "Aplikasi" [ref=f8e11] [cursor=pointer]:
+          - /url: /aplikasi
+        - link "Orang" [ref=f8e12] [cursor=pointer]:
+          - /url: /cast
+        - link "Tentang" [ref=f8e13] [cursor=pointer]:
+          - /url: /tentang-kami
+      - search [ref=f8e15]:
+        - generic [ref=f8e16]: Cari judul
+        - searchbox "Cari judul Cari judul Cari judul" [ref=f8e17]
+  - main [ref=f8e18]:
+    - generic [ref=f8e19]:
+      - region "Pilihan Editor" [ref=f8e20]:
+        - generic [ref=f8e21]:
+          - generic [ref=f8e572]:
+            - generic [ref=f8e573]:
+              - generic [ref=f8e574]:
+                - generic [ref=f8e575]: ⭐ Pilihan Editor
+                - generic [ref=f8e576]: Film
+              - heading "Voicemails for Isabelle" [level=1] [ref=f8e577]
+              - generic [ref=f8e579]:
+                - text: "5.0"
+                - generic [aria-hidden] [ref=f8e580]: ★
+              - generic [ref=f8e581]:
+                - link "Lihat Review Lengkap" [ref=f8e582] [cursor=pointer]:
+                  - /url: /content/voicemails-for-isabelle
+                - link "Jelajahi Semua Film" [ref=f8e583] [cursor=pointer]:
+                  - /url: /films
+            - generic [ref=f8e585]:
+              - link [ref=f8e586] [cursor=pointer]:
+                - /url: /content/voicemails-for-isabelle
+                - img "Voicemails for Isabelle" [ref=f8e587]
+              - generic [ref=f8e588]:
+                - generic [ref=f8e589]: "5.0"
+                - generic [ref=f8e590]: Skor
+          - generic [ref=f8e42]:
+            - button "Pilihan sebelumnya" [ref=f8e43]
+            - tablist "Daftar pilihan editor" [ref=f8e46]:
+              - tab "Tampilkan Voicemails for Isabelle" [selected] [ref=f8e47]
+              - tab "Tampilkan Anora" [ref=f8e48]
+              - tab "Tampilkan The Odyssey" [ref=f8e49]
+              - tab "Tampilkan Widow's Bay" [ref=f8e50]
+              - tab "Tampilkan Punjab '95" [ref=f8e51]
+              - tab "Tampilkan Backrooms" [ref=f8e52]
+              - tab "Tampilkan Young Washington" [ref=f8e53]
+            - button "Pilihan berikutnya" [active] [ref=f8e54]
+          - generic [ref=f8e57]:
+            - button "Pilih Voicemails for Isabelle" [ref=f8e58]:
+              - paragraph [ref=f8e60]: Voicemails for Isabelle
+            - button "Pilih Anora" [ref=f8e61]:
+              - paragraph [ref=f8e63]: Anora
+            - button "Pilih The Odyssey" [ref=f8e64]:
+              - paragraph [ref=f8e66]: The Odyssey
+            - button "Pilih Widow's Bay" [ref=f8e67]:
+              - paragraph [ref=f8e69]: Widow's Bay
+            - button "Pilih Punjab '95" [ref=f8e70]:
+              - paragraph [ref=f8e72]: Punjab '95
+            - button "Pilih Backrooms" [ref=f8e73]:
+              - paragraph [ref=f8e75]: Backrooms
+            - button "Pilih Young Washington" [ref=f8e76]:
+              - paragraph [ref=f8e78]: Young Washington
+      - generic [ref=f8e79]:
+        - generic [ref=f8e80]:
+          - generic [ref=f8e81]:
+            - generic [aria-hidden] [ref=f8e82]: ⭐
+            - text: Skor ahli di setiap judul
+          - generic [ref=f8e83]:
+            - generic [aria-hidden] [ref=f8e84]: 🎂
+            - text: Rating usia yang jelas
+          - generic [ref=f8e85]:
+            - generic [aria-hidden] [ref=f8e86]: 👨‍👩‍👧
+            - text: Kurasi oleh orang tua
+        - generic [ref=f8e87]:
+          - generic [ref=f8e88]:
+            - heading "🎂 Pilih sesuai usia anak" [level=2] [ref=f8e89]
+            - generic [ref=f8e90]: Setiap judul punya rating usia & poin keamanan
+          - generic [ref=f8e92]:
+            - link "Semua Umur" [ref=f8e93] [cursor=pointer]:
+              - /url: /films
+            - link "0–3 Bulan" [ref=f8e94] [cursor=pointer]:
+              - /url: /films?age=baru-lahir-0-3-bulan
+            - link "3–12 Bulan" [ref=f8e95] [cursor=pointer]:
+              - /url: /films?age=bayi-3-12-bulan
+            - link "1–5 Tahun" [ref=f8e96] [cursor=pointer]:
+              - /url: /films?age=balita-1-5-tahun
+            - link "5–13 Tahun" [ref=f8e97] [cursor=pointer]:
+              - /url: /films?age=anak-anak-5-13-tahun
+            - link "13+" [ref=f8e98] [cursor=pointer]:
+              - /url: /films?age=pra-remaja-13
+            - link "17+" [ref=f8e99] [cursor=pointer]:
+              - /url: /films?age=remaja-17
+            - link "21+" [ref=f8e100] [cursor=pointer]:
+              - /url: /films?age=dewasa-21
+        - generic [ref=f8e101]:
+          - generic [ref=f8e102]:
+            - generic [ref=f8e103]:
+              - heading "🎬 Film Terbaru" [level=2] [ref=f8e104]
+              - paragraph [ref=f8e105]: Review film pilihan untuk keluarga
+            - link "Lihat semua →" [ref=f8e106] [cursor=pointer]:
+              - /url: /films
+          - generic [ref=f8e107]:
+            - link "Anora Anora Film" [ref=f8e108] [cursor=pointer]:
+              - /url: /content/anora
+              - img "Anora" [ref=f8e110]
+              - generic [ref=f8e111]:
+                - paragraph [ref=f8e112]: Anora
+                - generic [ref=f8e113]: Film
+            - link "The Odyssey The Odyssey Film" [ref=f8e115] [cursor=pointer]:
+              - /url: /content/the-odyssey
+              - img "The Odyssey" [ref=f8e117]
+              - generic [ref=f8e118]:
+                - paragraph [ref=f8e119]: The Odyssey
+                - generic [ref=f8e120]: Film
+            - link "Voicemails for Isabelle Voicemails for Isabelle Film" [ref=f8e122] [cursor=pointer]:
+              - /url: /content/voicemails-for-isabelle
+              - img "Voicemails for Isabelle" [ref=f8e124]
+              - generic [ref=f8e125]:
+                - paragraph [ref=f8e126]: Voicemails for Isabelle
+                - generic [ref=f8e127]: Film
+            - link "Widow's Bay Widow's Bay Film" [ref=f8e129] [cursor=pointer]:
+              - /url: /content/widows-bay
+              - img "Widow's Bay" [ref=f8e131]
+              - generic [ref=f8e132]:
+                - paragraph [ref=f8e133]: Widow's Bay
+                - generic [ref=f8e134]: Film
+            - link "Punjab '95 Punjab '95 Film" [ref=f8e136] [cursor=pointer]:
+              - /url: /content/punjab-95
+              - img "Punjab '95" [ref=f8e138]
+              - generic [ref=f8e139]:
+                - paragraph [ref=f8e140]: Punjab '95
+                - generic [ref=f8e141]: Film
+            - link "Backrooms Backrooms Film" [ref=f8e143] [cursor=pointer]:
+              - /url: /content/backrooms
+              - img "Backrooms" [ref=f8e145]
+              - generic [ref=f8e146]:
+                - paragraph [ref=f8e147]: Backrooms
+                - generic [ref=f8e148]: Film
+            - link "Young Washington Young Washington Film" [ref=f8e150] [cursor=pointer]:
+              - /url: /content/young-washington
+              - img "Young Washington" [ref=f8e152]
+              - generic [ref=f8e153]:
+                - paragraph [ref=f8e154]: Young Washington
+                - generic [ref=f8e155]: Film
+        - generic [ref=f8e157]:
+          - generic [ref=f8e158]:
+            - generic [ref=f8e159]:
+              - heading "🎮 Game & Aplikasi" [level=2] [ref=f8e160]
+              - paragraph [ref=f8e161]: Main dengan nilai positif
+            - link "Lihat semua →" [ref=f8e162] [cursor=pointer]:
+              - /url: /game
+          - generic [ref=f8e163]:
+            - link "WARDOGS WARDOGS Game" [ref=f8e164] [cursor=pointer]:
+              - /url: /content/wardogs
+              - img "WARDOGS" [ref=f8e166]
+              - generic [ref=f8e167]:
+                - paragraph [ref=f8e168]: WARDOGS
+                - generic [ref=f8e169]: Game
+            - link "BOMBANANA! BOMBANANA! Game" [ref=f8e171] [cursor=pointer]:
+              - /url: /content/bombanana
+              - img "BOMBANANA!" [ref=f8e173]
+              - generic [ref=f8e174]:
+                - paragraph [ref=f8e175]: BOMBANANA!
+                - generic [ref=f8e176]: Game
+            - link "Dungeon Settlers Dungeon Settlers Game" [ref=f8e178] [cursor=pointer]:
+              - /url: /content/dungeon-settlers
+              - img "Dungeon Settlers" [ref=f8e180]
+              - generic [ref=f8e181]:
+                - paragraph [ref=f8e182]: Dungeon Settlers
+                - generic [ref=f8e183]: Game
+            - link "Aniimo Aniimo Game" [ref=f8e185] [cursor=pointer]:
+              - /url: /content/aniimo
+              - img "Aniimo" [ref=f8e187]
+              - generic [ref=f8e188]:
+                - paragraph [ref=f8e189]: Aniimo
+                - generic [ref=f8e190]: Game
+            - link "Dirty Business Dirty Business Game" [ref=f8e192] [cursor=pointer]:
+              - /url: /content/dirty-business
+              - img "Dirty Business" [ref=f8e194]
+              - generic [ref=f8e195]:
+                - paragraph [ref=f8e196]: Dirty Business
+                - generic [ref=f8e197]: Game
+            - link "Crime Scene Cleaner Crime Scene Cleaner Game" [ref=f8e199] [cursor=pointer]:
+              - /url: /content/crime-scene-cleaner
+              - img "Crime Scene Cleaner" [ref=f8e201]
+              - generic [ref=f8e202]:
+                - paragraph [ref=f8e203]: Crime Scene Cleaner
+                - generic [ref=f8e204]: Game
+            - link "Lemon8 Lemon8 Aplikasi" [ref=f8e206] [cursor=pointer]:
+              - /url: /content/lemon8
+              - img "Lemon8" [ref=f8e208]
+              - generic [ref=f8e209]:
+                - paragraph [ref=f8e210]: Lemon8
+                - generic [ref=f8e211]: Aplikasi
+            - link "WPS Office WPS Office Aplikasi" [ref=f8e213] [cursor=pointer]:
+              - /url: /content/wps-office
+              - img "WPS Office" [ref=f8e215]
+              - generic [ref=f8e216]:
+                - paragraph [ref=f8e217]: WPS Office
+                - generic [ref=f8e218]: Aplikasi
+            - link "Grammarly Grammarly Aplikasi" [ref=f8e220] [cursor=pointer]:
+              - /url: /content/grammarly
+              - img "Grammarly" [ref=f8e222]
+              - generic [ref=f8e223]:
+                - paragraph [ref=f8e224]: Grammarly
+                - generic [ref=f8e225]: Aplikasi
+            - link "Pinterest Pinterest Aplikasi" [ref=f8e227] [cursor=pointer]:
+              - /url: /content/pinterest
+              - img "Pinterest" [ref=f8e229]
+              - generic [ref=f8e230]:
+                - paragraph [ref=f8e231]: Pinterest
+                - generic [ref=f8e232]: Aplikasi
+            - link "Zepeto Zepeto Aplikasi" [ref=f8e234] [cursor=pointer]:
+              - /url: /content/zepeto
+              - img "Zepeto" [ref=f8e236]
+              - generic [ref=f8e237]:
+                - paragraph [ref=f8e238]: Zepeto
+                - generic [ref=f8e239]: Aplikasi
+            - link "WeTV WeTV Aplikasi" [ref=f8e241] [cursor=pointer]:
+              - /url: /content/wetv
+              - img "WeTV" [ref=f8e243]
+              - generic [ref=f8e244]:
+                - paragraph [ref=f8e245]: WeTV
+                - generic [ref=f8e246]: Aplikasi
+        - generic [ref=f8e248]:
+          - generic [ref=f8e249]:
+            - generic [ref=f8e250]:
+              - heading "📺 Serial Terbaru" [level=2] [ref=f8e251]
+              - paragraph [ref=f8e252]: Episode yang aman ditonton bersama
+            - link "Lihat semua →" [ref=f8e253] [cursor=pointer]:
+              - /url: /series
+          - generic [ref=f8e254]:
+            - link "I Will Find You I Will Find You Series" [ref=f8e255] [cursor=pointer]:
+              - /url: /content/i-will-find-you
+              - img "I Will Find You" [ref=f8e257]
+              - generic [ref=f8e258]:
+                - paragraph [ref=f8e259]: I Will Find You
+                - generic [ref=f8e260]: Series
+            - link "Off Campus Off Campus Series" [ref=f8e262] [cursor=pointer]:
+              - /url: /content/off-campus
+              - img "Off Campus" [ref=f8e264]
+              - generic [ref=f8e265]:
+                - paragraph [ref=f8e266]: Off Campus
+                - generic [ref=f8e267]: Series
+            - link "The Wire The Wire Series" [ref=f8e269] [cursor=pointer]:
+              - /url: /content/the-wire
+              - img "The Wire" [ref=f8e271]
+              - generic [ref=f8e272]:
+                - paragraph [ref=f8e273]: The Wire
+                - generic [ref=f8e274]: Series
+            - 'link "Law & Order: Special Victims Unit Law & Order: Special Victims Unit Series" [ref=f8e276] [cursor=pointer]':
+              - /url: /content/law-order-special-victims-unit
+              - 'img "Law & Order: Special Victims Unit" [ref=f8e278]'
+              - generic [ref=f8e279]:
+                - paragraph [ref=f8e280]: "Law & Order: Special Victims Unit"
+                - generic [ref=f8e281]: Series
+            - link "The Untamed Special Edition The Untamed Special Edition Series" [ref=f8e283] [cursor=pointer]:
+              - /url: /content/the-untamed-special-edition
+              - img "The Untamed Special Edition" [ref=f8e285]
+              - generic [ref=f8e286]:
+                - paragraph [ref=f8e287]: The Untamed Special Edition
+                - generic [ref=f8e288]: Series
+            - link "Reply 1988 Reply 1988 Series" [ref=f8e290] [cursor=pointer]:
+              - /url: /content/reply-1988
+              - img "Reply 1988" [ref=f8e292]
+              - generic [ref=f8e293]:
+                - paragraph [ref=f8e294]: Reply 1988
+                - generic [ref=f8e295]: Series
+            - link "Nirvana in Fire Nirvana in Fire Series" [ref=f8e297] [cursor=pointer]:
+              - /url: /content/nirvana-in-fire
+              - img "Nirvana in Fire" [ref=f8e299]
+              - generic [ref=f8e300]:
+                - paragraph [ref=f8e301]: Nirvana in Fire
+                - generic [ref=f8e302]: Series
+            - link "Hospital Playlist Hospital Playlist Series" [ref=f8e304] [cursor=pointer]:
+              - /url: /content/hospital-playlist
+              - img "Hospital Playlist" [ref=f8e306]
+              - generic [ref=f8e307]:
+                - paragraph [ref=f8e308]: Hospital Playlist
+                - generic [ref=f8e309]: Series
+            - link "Siren’s Kiss Siren’s Kiss Series" [ref=f8e311] [cursor=pointer]:
+              - /url: /content/sirens-kiss
+              - img "Siren’s Kiss" [ref=f8e313]
+              - generic [ref=f8e314]:
+                - paragraph [ref=f8e315]: Siren’s Kiss
+                - generic [ref=f8e316]: Series
+            - link "In Your Radiant Season In Your Radiant Season Series" [ref=f8e318] [cursor=pointer]:
+              - /url: /content/in-your-radiant-season
+              - img "In Your Radiant Season" [ref=f8e320]
+              - generic [ref=f8e321]:
+                - paragraph [ref=f8e322]: In Your Radiant Season
+                - generic [ref=f8e323]: Series
+            - link "Still Shining Still Shining Series" [ref=f8e325] [cursor=pointer]:
+              - /url: /content/still-shining
+              - img "Still Shining" [ref=f8e327]
+              - generic [ref=f8e328]:
+                - paragraph [ref=f8e329]: Still Shining
+                - generic [ref=f8e330]: Series
+            - link "Phantom Lawyer Phantom Lawyer Series" [ref=f8e332] [cursor=pointer]:
+              - /url: /content/phantom-lawyer
+              - img "Phantom Lawyer" [ref=f8e334]
+              - generic [ref=f8e335]:
+                - paragraph [ref=f8e336]: Phantom Lawyer
+                - generic [ref=f8e337]: Series
+        - generic [ref=f8e339]:
+          - generic [ref=f8e340]:
+            - generic [ref=f8e341]:
+              - heading "📚 E-Books" [level=2] [ref=f8e342]
+              - paragraph [ref=f8e343]: Tumbuhkan minat baca sejak dini
+            - link "Lihat semua →" [ref=f8e344] [cursor=pointer]:
+              - /url: /e-books
+          - generic [ref=f8e345]:
+            - link "Dompet Ayah Sepatu Ibu Dompet Ayah Sepatu Ibu E-books" [ref=f8e346] [cursor=pointer]:
+              - /url: /content/dompet-ayah-sepatu-ibu
+              - img "Dompet Ayah Sepatu Ibu" [ref=f8e348]
+              - generic [ref=f8e349]:
+                - paragraph [ref=f8e350]: Dompet Ayah Sepatu Ibu
+                - generic [ref=f8e351]: E-books
+            - 'link "Timesland II: Elsie''s Story (2) Timesland II: Elsie''s Story (2) E-books" [ref=f8e353] [cursor=pointer]':
+              - /url: /content/timesland-ii-elsies-story-2
+              - 'img "Timesland II: Elsie''s Story (2)" [ref=f8e355]'
+              - generic [ref=f8e356]:
+                - paragraph [ref=f8e357]: "Timesland II: Elsie's Story (2)"
+                - generic [ref=f8e358]: E-books
+            - 'link "Catatan Petualangan Vantrala: Cosmos Catatan Petualangan Vantrala: Cosmos E-books" [ref=f8e360] [cursor=pointer]':
+              - /url: /content/catatan-petualangan-vantrala-cosmos
+              - 'img "Catatan Petualangan Vantrala: Cosmos" [ref=f8e362]'
+              - generic [ref=f8e363]:
+                - paragraph [ref=f8e364]: "Catatan Petualangan Vantrala: Cosmos"
+                - generic [ref=f8e365]: E-books
+            - 'link "Catatan Petualangan Vantrala: Venus Catatan Petualangan Vantrala: Venus E-books" [ref=f8e367] [cursor=pointer]':
+              - /url: /content/catatan-petualangan-vantrala-venus
+              - 'img "Catatan Petualangan Vantrala: Venus" [ref=f8e369]'
+              - generic [ref=f8e370]:
+                - paragraph [ref=f8e371]: "Catatan Petualangan Vantrala: Venus"
+                - generic [ref=f8e372]: E-books
+            - 'link "Catatan Petualangan Vantrala: Penjelajah Semesta Catatan Petualangan Vantrala: Penjelajah Semesta E-books" [ref=f8e374] [cursor=pointer]':
+              - /url: /content/catatan-petualangan-vantrala-penjelajah-semesta
+              - 'img "Catatan Petualangan Vantrala: Penjelajah Semesta" [ref=f8e376]'
+              - generic [ref=f8e377]:
+                - paragraph [ref=f8e378]: "Catatan Petualangan Vantrala: Penjelajah Semesta"
+                - generic [ref=f8e379]: E-books
+            - 'link "Catatan Petualangan Vantrala: Antarctica Catatan Petualangan Vantrala: Antarctica E-books" [ref=f8e381] [cursor=pointer]':
+              - /url: /content/catatan-petualangan-vantrala-antarctica
+              - 'img "Catatan Petualangan Vantrala: Antarctica" [ref=f8e383]'
+              - generic [ref=f8e384]:
+                - paragraph [ref=f8e385]: "Catatan Petualangan Vantrala: Antarctica"
+                - generic [ref=f8e386]: E-books
+            - link "Teman Baru Epi Teman Baru Epi E-books" [ref=f8e388] [cursor=pointer]:
+              - /url: /content/teman-baru-epi
+              - img "Teman Baru Epi" [ref=f8e390]
+              - generic [ref=f8e391]:
+                - paragraph [ref=f8e392]: Teman Baru Epi
+                - generic [ref=f8e393]: E-books
+            - link "Negeri Temaram Negeri Temaram E-books" [ref=f8e395] [cursor=pointer]:
+              - /url: /content/negeri-temaram
+              - img "Negeri Temaram" [ref=f8e397]
+              - generic [ref=f8e398]:
+                - paragraph [ref=f8e399]: Negeri Temaram
+                - generic [ref=f8e400]: E-books
+            - link "Sama atau Berbeda? Sama atau Berbeda? E-books" [ref=f8e402] [cursor=pointer]:
+              - /url: /content/sama-atau-berbeda
+              - img "Sama atau Berbeda?" [ref=f8e404]
+              - generic [ref=f8e405]:
+                - paragraph [ref=f8e406]: Sama atau Berbeda?
+                - generic [ref=f8e407]: E-books
+            - link "Butet dan Orang Rimba Butet dan Orang Rimba E-books" [ref=f8e409] [cursor=pointer]:
+              - /url: /content/butet-dan-orang-rimba
+              - img "Butet dan Orang Rimba" [ref=f8e411]
+              - generic [ref=f8e412]:
+                - paragraph [ref=f8e413]: Butet dan Orang Rimba
+                - generic [ref=f8e414]: E-books
+            - link "Perangkap Hebat Soma Perangkap Hebat Soma E-books" [ref=f8e416] [cursor=pointer]:
+              - /url: /content/perangkap-hebat-soma
+              - img "Perangkap Hebat Soma" [ref=f8e418]
+              - generic [ref=f8e419]:
+                - paragraph [ref=f8e420]: Perangkap Hebat Soma
+                - generic [ref=f8e421]: E-books
+            - link "Pelukis Istimewa Pelukis Istimewa E-books" [ref=f8e423] [cursor=pointer]:
+              - /url: /content/pelukis-istimewa
+              - img "Pelukis Istimewa" [ref=f8e425]
+              - generic [ref=f8e426]:
+                - paragraph [ref=f8e427]: Pelukis Istimewa
+                - generic [ref=f8e428]: E-books
+        - generic [ref=f8e430]:
+          - heading "🚪 Jelajahi Semua" [level=2] [ref=f8e431]
+          - generic [ref=f8e432]:
+            - link "🎬 Film Rating usia & review kurasi untuk film pilihan anak." [ref=f8e433] [cursor=pointer]:
+              - /url: /films
+              - generic [ref=f8e434]: 🎬
+              - paragraph [ref=f8e435]: Film
+              - paragraph [ref=f8e436]: Rating usia & review kurasi untuk film pilihan anak.
+            - link "📺 Serial Serial TV & streaming yang aman ditonton keluarga." [ref=f8e437] [cursor=pointer]:
+              - /url: /series
+              - generic [ref=f8e438]: 📺
+              - paragraph [ref=f8e439]: Serial
+              - paragraph [ref=f8e440]: Serial TV & streaming yang aman ditonton keluarga.
+            - link "📚 E-Books Bacaan digital untuk memancing minat baca anak." [ref=f8e441] [cursor=pointer]:
+              - /url: /e-books
+              - generic [ref=f8e442]: 📚
+              - paragraph [ref=f8e443]: E-Books
+              - paragraph [ref=f8e444]: Bacaan digital untuk memancing minat baca anak.
+            - link "🎮 Game Game & aplikasi bermain dengan nilai positif." [ref=f8e445] [cursor=pointer]:
+              - /url: /game
+              - generic [ref=f8e446]: 🎮
+              - paragraph [ref=f8e447]: Game
+              - paragraph [ref=f8e448]: Game & aplikasi bermain dengan nilai positif.
+            - link "📱 Aplikasi Aplikasi edukatif yang teruji untuk si kecil." [ref=f8e449] [cursor=pointer]:
+              - /url: /aplikasi
+              - generic [ref=f8e450]: 📱
+              - paragraph [ref=f8e451]: Aplikasi
+              - paragraph [ref=f8e452]: Aplikasi edukatif yang teruji untuk si kecil.
+        - generic [ref=f8e456]:
+          - heading "✨ Cari review tontonan favoritmu" [level=2] [ref=f8e457]
+          - paragraph [ref=f8e458]: Ketik judul film, serial, game, atau e-book — kami tunjukkan skor keamanannya untuk anak.
+          - search [ref=f8e460]:
+            - generic [ref=f8e461]: Cari judul
+            - searchbox "Cari film, game, e-book…" [ref=f8e462]
+        - generic [ref=f8e463]:
+          - heading "🆕 Baru Ditambahkan" [level=2] [ref=f8e464]
+          - generic [ref=f8e465]:
+            - link "Anora Anora Film" [ref=f8e466] [cursor=pointer]:
+              - /url: /content/anora
+              - img "Anora" [ref=f8e468]
+              - generic [ref=f8e469]:
+                - paragraph [ref=f8e470]: Anora
+                - generic [ref=f8e471]: Film
+            - link "The Odyssey The Odyssey Film" [ref=f8e473] [cursor=pointer]:
+              - /url: /content/the-odyssey
+              - img "The Odyssey" [ref=f8e475]
+              - generic [ref=f8e476]:
+                - paragraph [ref=f8e477]: The Odyssey
+                - generic [ref=f8e478]: Film
+            - link "Voicemails for Isabelle Voicemails for Isabelle Film" [ref=f8e480] [cursor=pointer]:
+              - /url: /content/voicemails-for-isabelle
+              - img "Voicemails for Isabelle" [ref=f8e482]
+              - generic [ref=f8e483]:
+                - paragraph [ref=f8e484]: Voicemails for Isabelle
+                - generic [ref=f8e485]: Film
+            - link "Widow's Bay Widow's Bay Film" [ref=f8e487] [cursor=pointer]:
+              - /url: /content/widows-bay
+              - img "Widow's Bay" [ref=f8e489]
+              - generic [ref=f8e490]:
+                - paragraph [ref=f8e491]: Widow's Bay
+                - generic [ref=f8e492]: Film
+            - link "Punjab '95 Punjab '95 Film" [ref=f8e494] [cursor=pointer]:
+              - /url: /content/punjab-95
+              - img "Punjab '95" [ref=f8e496]
+              - generic [ref=f8e497]:
+                - paragraph [ref=f8e498]: Punjab '95
+                - generic [ref=f8e499]: Film
+            - link "Backrooms Backrooms Film" [ref=f8e501] [cursor=pointer]:
+              - /url: /content/backrooms
+              - img "Backrooms" [ref=f8e503]
+              - generic [ref=f8e504]:
+                - paragraph [ref=f8e505]: Backrooms
+                - generic [ref=f8e506]: Film
+  - contentinfo [ref=f8e508]:
+    - generic [ref=f8e509]:
+      - generic [ref=f8e510]:
+        - generic [ref=f8e511]: screenscore
+        - paragraph [ref=f8e512]: Review konten terbaik untuk anak. Kurasi jujur dari orang tua, untuk tontonan dan mainan yang aman bagi anak.
+      - generic [ref=f8e513]:
+        - heading "Kategori" [level=3] [ref=f8e514]
+        - list [ref=f8e515]:
+          - listitem [ref=f8e516]:
+            - link "Film" [ref=f8e517] [cursor=pointer]:
+              - /url: /films
+          - listitem [ref=f8e518]:
+            - link "Serial" [ref=f8e519] [cursor=pointer]:
+              - /url: /series
+          - listitem [ref=f8e520]:
+            - link "E-Books" [ref=f8e521] [cursor=pointer]:
+              - /url: /e-books
+          - listitem [ref=f8e522]:
+            - link "Game" [ref=f8e523] [cursor=pointer]:
+              - /url: /game
+          - listitem [ref=f8e524]:
+            - link "Aplikasi" [ref=f8e525] [cursor=pointer]:
+              - /url: /aplikasi
+      - generic [ref=f8e526]:
+        - heading "Lainnya" [level=3] [ref=f8e527]
+        - list [ref=f8e528]:
+          - listitem [ref=f8e529]:
+            - link "Tentang Kami" [ref=f8e530] [cursor=pointer]:
+              - /url: /tentang-kami
+          - listitem [ref=f8e531]:
+            - link "Kontak" [ref=f8e532] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=f8e533]:
+            - link "Ajukan Judul" [ref=f8e534] [cursor=pointer]:
+              - /url: /ajukan-judul-baru
+          - listitem [ref=f8e535]:
+            - link "Ketentuan Layanan" [ref=f8e536] [cursor=pointer]:
+              - /url: /ketentuan-layanan-screenscore
+          - listitem [ref=f8e537]:
+            - link "Privasi" [ref=f8e538] [cursor=pointer]:
+              - /url: /privacy-policy
+    - generic [ref=f8e539]: © 2026 ScreenScore — WordPress headless + Next.js
+  - button "Open Next.js Dev Tools" [ref=f8e566] [cursor=pointer]
+  - alert [ref=f8e570]

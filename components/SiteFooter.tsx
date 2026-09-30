@@ -3,11 +3,11 @@ import { CATEGORY_LIST, SITE } from "@/lib/config";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 bg-ink text-white/70">
+    <footer className="mt-16 border-t border-line bg-surface text-muted">
       <div className="mx-auto grid max-w-[1280px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
           <div className="text-2xl font-extrabold">
-            <span className="text-yellow">screen</span>
+            <span className="text-ink">screen</span>
             <span className="text-pink">score</span>
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed">
@@ -16,13 +16,13 @@ export function SiteFooter() {
           </p>
         </div>
         <div>
-          <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white">
+          <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink">
             Kategori
           </h3>
           <ul className="space-y-2 text-sm">
             {CATEGORY_LIST.map((c) => (
               <li key={c.slug}>
-                <Link href={c.path} className="hover:text-yellow">
+                <Link href={c.path} className="hover:text-pink">
                   {c.name}
                 </Link>
               </li>
@@ -30,19 +30,20 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white">
+          <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink">
             Lainnya
           </h3>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/tentang-kami" className="hover:text-yellow">Tentang Kami</Link></li>
-            <li><Link href="/contact" className="hover:text-yellow">Kontak</Link></li>
-            <li><Link href="/ajukan-judul-baru" className="hover:text-yellow">Ajukan Judul</Link></li>
-            <li><Link href="/ketentuan-layanan-screenscore" className="hover:text-yellow">Ketentuan Layanan</Link></li>
-            <li><Link href="/privacy-policy" className="hover:text-yellow">Privasi</Link></li>
+            <li><Link href="/blog" className="hover:text-pink">Artikel & Tips</Link></li>
+            <li><Link href="/tentang-kami" className="hover:text-pink">Tentang Kami</Link></li>
+            <li><Link href="/contact" className="hover:text-pink">Kontak</Link></li>
+            <li><Link href="/ajukan-judul-baru" className="hover:text-pink">Ajukan Judul</Link></li>
+            <li><Link href="/ketentuan-layanan-screenscore" className="hover:text-pink">Ketentuan Layanan</Link></li>
+            <li><Link href="/privacy-policy" className="hover:text-pink">Privasi</Link></li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/10 py-5 text-center text-xs">
+      <div className="border-t border-line py-5 text-center text-xs">
         © {new Date().getFullYear()} ScreenScore — WordPress headless + Next.js
       </div>
     </footer>

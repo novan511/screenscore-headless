@@ -56,7 +56,7 @@ export function PosterCard({
         )}
 
         {age && (
-          <span className="absolute left-1.5 top-1.5 rounded bg-ink/85 px-1.5 py-0.5 text-[11px] font-bold text-white backdrop-blur">
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-pink px-2 py-0.5 text-[11px] font-bold text-white">
             {age}
           </span>
         )}
