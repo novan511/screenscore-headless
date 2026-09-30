@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  /* warm near-black chrome, IMDb-style */
+  --color-ink: #17141a;
+  --color-ink-2: #231e29;
+  --color-ink-3: #322c3a;
+
+  /* paper */
+  --color-canvas: #ffffff;
+  --color-surface: #f6f4f0;
+  --color-line: #e7e2db;
+
+  /* ScreenScore brand */
+  --color-pink: #e5117f;
+  --color-pink-600: #c00d6a;
+  --color-yellow: #ffd400;
+  --color-yellow-600: #e6be00;
+
+  --color-muted: #6e6a75;
+  --color-ok: #1f9d55;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* horizontal rails without ugly scrollbars */
+.rail {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 0.25rem;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* poster hover — lift + pink outline like a modern database card */
+.poster-card img {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.poster-card:hover img {
+  transform: scale(1.04);
+  box-shadow: 0 12px 32px rgb(23 20 26 / 0.28);
+}
+
+:where(a, button, input, summary):focus-visible {
+  outline: 2px solid var(--color-pink);
+  outline-offset: 2px;
+}
