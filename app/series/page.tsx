@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { ArchiveView } from "@/components/ArchiveView";
 import { CATEGORIES } from "@/lib/config";
-import { parseArchiveParams } from "@/lib/params";
+import { archiveMetadata, parseArchiveParams } from "@/lib/params";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Serial",
-  description: CATEGORIES.series.blurb,
-};
-
-export default async function SeriesPage({
-  searchParams,
-}: {
+interface Props {
   searchParams: Promise<{ page?: string; age?: string }>;
-}) {
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await parseArchiveParams(searchParams);
+  return archiveMetadata(CATEGORIES.series, params);
+}
+
+export default async function SeriesPage({ searchParams }: Props) {
   const { page, age } = await parseArchiveParams(searchParams);
   return <ArchiveView category={CATEGORIES.series} page={page} age={age} />;
 }

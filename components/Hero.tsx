@@ -29,6 +29,7 @@ export function Hero({
             fill
             priority
             sizes="100vw"
+            quality={70}
             className="object-cover opacity-40"
           />
         )}
@@ -78,7 +79,7 @@ export function Hero({
 
           <Link
             href={`/content/${featured.slug}`}
-            className="mt-6 inline-flex rounded-full bg-pink px-6 py-3 text-sm font-extrabold text-white transition hover:bg-pink-600"
+            className="press mt-6 inline-flex rounded-full bg-pink px-6 py-3 text-sm font-extrabold text-white hover:bg-pink-600"
           >
             Lihat Review Lengkap
           </Link>
@@ -102,6 +103,7 @@ export function Hero({
                       alt={t.name}
                       fill
                       sizes="120px"
+                      quality={70}
                       className="object-cover transition group-hover:scale-105"
                     />
                   )}

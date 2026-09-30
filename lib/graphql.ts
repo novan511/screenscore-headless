@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { ENDPOINTS, SITE } from "./config";
+import { isUpstreamError, wpFetch } from "./http";
 import type { PersonKind } from "./types";
 
 /**
@@ -10,11 +12,13 @@ export async function gql<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const res = await fetch(ENDPOINTS.graphql, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
-    next: { revalidate: SITE.revalidate },
+  const res = await wpFetch(ENDPOINTS.graphql, {
+    revalidate: SITE.revalidate,
+    init: {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables }),
+    },
   });
   if (!res.ok) {
     throw new Error(`GraphQL HTTP ${res.status} for ${query.slice(0, 60)}…`);
@@ -86,10 +90,10 @@ export async function fetchPeople(
   };
 }
 
-export async function fetchPerson(
+export const fetchPerson = cache(async (
   kind: PersonKind,
   slugOrUri: string,
-): Promise<GqlPersonNode | null> {
+): Promise<GqlPersonNode | null> => {
   const field =
     kind === "cast" ? "cast"
       : kind === "creator" ? "creator"
@@ -100,19 +104,23 @@ export async function fetchPerson(
     const data = await gql<Record<string, GqlPersonNode | null>>(
       `{ ${field}(id: "${escapeGql(slugOrUri)}", idType: SLUG) { ${PERSON_FIELDS} } }`,
     );
-    return data[field];
-  } catch {
-    // hierarchical types (character/marvel/carnage) resolve by URI instead
-    try {
-      const data = await gql<{ nodeByUri: GqlPersonNode | null }>(
-        `{ nodeByUri(uri: "${escapeGql(slugOrUri)}") { ... on Node { databaseId } ... on UniformResourceIdentifiable { uri } } }`,
-      );
-      return (data.nodeByUri as GqlPersonNode | null) ?? null;
-    } catch {
-      return null;
-    }
+    return data[field] ?? null;
+  } catch (err) {
+    // An unreachable backend must not be reported as "person not found".
+    if (isUpstreamError(err)) throw err;
   }
-}
+
+  // hierarchical types (character/marvel/carnage) resolve by URI instead
+  try {
+    const data = await gql<{ nodeByUri: GqlPersonNode | null }>(
+      `{ nodeByUri(uri: "${escapeGql(slugOrUri)}") { ... on Node { databaseId } ... on UniformResourceIdentifiable { uri } } }`,
+    );
+    return data.nodeByUri ?? null;
+  } catch (err) {
+    if (isUpstreamError(err)) throw err;
+    return null;
+  }
+});
 
 export interface GqlPage {
   title: string;
@@ -121,12 +129,14 @@ export interface GqlPage {
   content: string;
 }
 
-export async function fetchStaticPage(slug: string): Promise<GqlPage | null> {
-  const data = await gql<{ page: GqlPage | null }>(
-    `{ page(id: "${escapeGql(slug)}", idType: URI) { title slug uri content } }`,
-  );
-  return data.page;
-}
+export const fetchStaticPage = cache(
+  async (slug: string): Promise<GqlPage | null> => {
+    const data = await gql<{ page: GqlPage | null }>(
+      `{ page(id: "${escapeGql(slug)}", idType: URI) { title slug uri content } }`,
+    );
+    return data.page;
+  },
+);
 
 export async function fetchMenu(): Promise<{ label: string; uri: string }[]> {
   const data = await gql<{

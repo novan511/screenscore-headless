@@ -1,11 +1,16 @@
+import { cache } from "react";
 import { ENDPOINTS, SITE } from "./config";
-import { decodeEntities } from "./utils";
+import { UpstreamError, wpFetch } from "./http";
+import { clamp, decodeEntities, stripMetaList, stripTags } from "./utils";
 import type { Paged, SeoMeta, Term, Title, TitleImage } from "./types";
 
 /**
  * WooCommerce Store API client — the source of truth for titles.
  * (WPGraphQL on this site does not register the `product` post type,
  * so titles come from REST while everything else uses GraphQL.)
+ *
+ * Reads are wrapped in React `cache()` so a route that needs the same product
+ * twice (generateMetadata + page) only hits WordPress once per request.
  */
 
 interface StoreProduct {
@@ -32,99 +37,84 @@ interface ListParams {
   order?: string;
 }
 
-export async function fetchTitles(params: ListParams = {}): Promise<Paged<Title>> {
-  const qs = new URLSearchParams();
-  if (params.category) qs.set("category", params.category);
-  if (params.tag) qs.set("tag", params.tag);
-  if (params.search) qs.set("search", params.search);
-  qs.set("page", String(params.page ?? 1));
-  qs.set("per_page", String(params.perPage ?? 16));
-  if (params.orderby) qs.set("orderby", params.orderby);
-  if (params.order) qs.set("order", params.order);
+export const fetchTitles = cache(
+  async (params: ListParams = {}): Promise<Paged<Title>> => {
+    const qs = new URLSearchParams();
+    if (params.category) qs.set("category", params.category);
+    if (params.tag) qs.set("tag", params.tag);
+    if (params.search) qs.set("search", params.search);
+    qs.set("page", String(params.page ?? 1));
+    qs.set("per_page", String(params.perPage ?? 16));
+    if (params.orderby) qs.set("orderby", params.orderby);
+    if (params.order) qs.set("order", params.order);
 
-  const res = await fetch(`${ENDPOINTS.store}/products?${qs}`, {
-    next: { revalidate: SITE.revalidate },
-  });
-  if (!res.ok) throw new Error(`Store API HTTP ${res.status}`);
-  const raw = (await res.json()) as StoreProduct[];
-  const total = Number(res.headers.get("x-wp-total") ?? raw.length);
-  const totalPages = Number(res.headers.get("x-wp-totalpages") ?? 1);
-  return {
-    items: raw.map(mapTitle),
-    page: params.page ?? 1,
-    total,
-    totalPages,
-  };
-}
+    const res = await wpFetch(`${ENDPOINTS.store}/products?${qs}`);
+    // A bad filter/param is a programming error, not "no content".
+    if (!res.ok) throw new Error(`Store API HTTP ${res.status}`);
 
-export async function fetchTitleBySlug(slug: string): Promise<Title | null> {
-  const res = await fetch(
-    `${ENDPOINTS.store}/products?slug=${encodeURIComponent(slug)}&per_page=1`,
-    { next: { revalidate: SITE.revalidate } },
-  );
-  if (!res.ok) return null;
-  const raw = (await res.json()) as StoreProduct[];
-  return raw[0] ? mapTitle(raw[0]) : null;
-}
+    const raw = (await res.json()) as StoreProduct[];
+    const total = Number(res.headers.get("x-wp-total") ?? raw.length);
+    const totalPages = Number(res.headers.get("x-wp-totalpages") ?? 1);
+    return {
+      items: raw.map(mapTitle),
+      page: params.page ?? 1,
+      total,
+      totalPages,
+    };
+  },
+);
+
+/**
+ * Returns `null` only when WordPress answered and the product genuinely does
+ * not exist. A WordPress outage throws instead, so the route fails loudly
+ * rather than minting a 404 that ISR would cache for five minutes.
+ */
+export const fetchTitleBySlug = cache(
+  async (slug: string): Promise<Title | null> => {
+    const res = await wpFetch(
+      `${ENDPOINTS.store}/products?slug=${encodeURIComponent(slug)}&per_page=1`,
+    );
+    if (!res.ok) {
+      throw new UpstreamError(`Store API HTTP ${res.status} for slug=${slug}`);
+    }
+    const raw = (await res.json()) as StoreProduct[];
+    return raw[0] ? mapTitle(raw[0]) : null;
+  },
+);
 
 /** Latest titles in a category (used by rails / hero). */
-export async function fetchLatest(
-  category: string,
-  perPage = 12,
-): Promise<Title[]> {
-  const p = await fetchTitles({
-    category,
-    perPage,
-    orderby: "date",
-    order: "desc",
-  });
-  return p.items;
-}
+export const fetchLatest = cache(
+  async (category: string, perPage = 12): Promise<Title[]> => {
+    const p = await fetchTitles({
+      category,
+      perPage,
+      orderby: "date",
+      order: "desc",
+    });
+    return p.items;
+  },
+);
 
-/** SEO (Yoast) metadata for a title — wp/v2 carries yoast_head_json. */
-export async function fetchTitleSeo(slug: string): Promise<SeoMeta | null> {
-  try {
-    const res = await fetch(
-      `${ENDPOINTS.wp}/product?slug=${encodeURIComponent(slug)}&_fields=yoast_head_json,title,excerpt&per_page=1`,
-      { next: { revalidate: SITE.revalidate } },
-    );
-    if (!res.ok) return null;
-    const rows = (await res.json()) as {
-      yoast_head_json?: {
-        title?: string;
-        description?: string;
-        og_image?: { url: string }[];
-      };
-    }[];
-    const y = rows[0]?.yoast_head_json;
-    if (!y) return null;
-    return {
-      title: y.title ?? "",
-      description: y.description ?? "",
-      image: y.og_image?.[0]?.url,
-    };
-  } catch {
-    return null;
-  }
-}
-
-/** Related titles from the same category, excluding the current slug. */
-export async function fetchRelated(
-  categorySlug: string,
-  excludeSlug: string,
-  perPage = 8,
-): Promise<Title[]> {
-  const p = await fetchTitles({
-    category: categorySlug,
-    perPage: perPage + 4,
-    orderby: "date",
-    order: "desc",
-  });
-  return p.items.filter((t) => t.slug !== excludeSlug).slice(0, perPage);
-}
+/** Related titles from the same category, excluding the current slug. */export const fetchRelated = cache(
+  async (
+    categorySlug: string,
+    excludeSlug: string,
+    perPage = 8,
+  ): Promise<Title[]> => {
+    const p = await fetchTitles({
+      category: categorySlug,
+      perPage: perPage + 4,
+      orderby: "date",
+      order: "desc",
+    });
+    return p.items.filter((t) => t.slug !== excludeSlug).slice(0, perPage);
+  },
+);
 
 function mapTitle(p: StoreProduct): Title {
-  const { year, ageRating, excerpt } = parseShortDescription(p.short_description);
+  const shortDescription = p.short_description ?? "";
+  const description = p.description ?? "";
+  const { year, ageRating, excerpt } = parseShortDescription(shortDescription);
   const name = decodeEntities(p.name);
   const images: TitleImage[] = p.images.map((i) => ({
     src: i.src,
@@ -136,8 +126,9 @@ function mapTitle(p: StoreProduct): Title {
     slug: p.slug,
     name,
     permalink: p.permalink,
-    shortDescription: p.short_description ?? "",
-    description: p.description ?? "",
+    shortDescription,
+    description,
+    body: resolveBody(description, shortDescription),
     images,
     categories: p.categories ?? [],
     tags: p.tags ?? [],
@@ -151,8 +142,27 @@ function mapTitle(p: StoreProduct): Title {
 }
 
 /**
+ * Pick the copy that actually has content.
+ *
+ * Roughly a third of the catalogue (including most games) publishes the whole
+ * article into `short_description` and leaves `description` blank — rendering
+ * only `description` is what made those detail pages look empty.
+ */
+function resolveBody(description: string, shortDescription: string): string {
+  const desc = description.trim();
+  if (desc) return desc;
+
+  const short = shortDescription.trim();
+  if (!short) return "";
+  // Short blurbs (year/age list + one hook line) stay in the header, not the body.
+  if (stripTags(short).length < 400) return "";
+  return stripMetaList(short);
+}
+
+/**
  * short_description layout from WP:
  *   <ul><li>2000</li><li>7+</li></ul><p>hook line…</p>
+ * Long-form products instead ship a full article here.
  */
 function parseShortDescription(html: string): {
   year?: string;
@@ -167,18 +177,16 @@ function parseShortDescription(html: string): {
   );
   const year = lis.find((t) => /^\d{4}$/.test(t));
   const ageRating = lis.find((t) => /\d+\s*\+/.test(t) && t.length <= 6);
-  const excerpt = paragraphs.find(Boolean);
+  const excerpt =
+    paragraphs.find(Boolean) ??
+    // Long-form posts have no leading <p> — fall back to the opening sentence.
+    firstSentence(stripTags(stripMetaList(html)));
   return { year, ageRating, excerpt };
 }
 
-export function stripTags(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#8217;|&#039;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#8211;/g, "–")
-    .replace(/\s+/g, " ")
-    .trim();
+function firstSentence(text: string): string | undefined {
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (!cleaned) return undefined;
+  const match = cleaned.match(/^(.{40,}?[.!?])(\s|$)/);
+  return clamp(match ? match[1] : cleaned, 200) || undefined;
 }

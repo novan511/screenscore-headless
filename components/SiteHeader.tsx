@@ -43,10 +43,13 @@ export function SiteHeader() {
 
         {/* mobile: CSS-only menu */}
         <details className="relative ml-auto lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white/90 hover:bg-white/10">
-            <span aria-hidden>☰</span> Menu
+          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10">
+            <span aria-hidden className="menu-bars">
+              ☰
+            </span>
+            Menu
           </summary>
-          <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-white/10 bg-ink-2 p-4 shadow-2xl">
+          <div className="menu-panel absolute right-0 top-full mt-2 w-64 rounded-xl border border-white/10 bg-ink-2 p-4 shadow-2xl">
             <div className="mb-3">
               <SearchForm dark />
             </div>

@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { fetchPeople } from "@/lib/graphql";
+import { ignoreMissing } from "@/lib/http";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Pemeran",
   description: "Daftar pemeran yang terdaftar di ScreenScore.",
+  alternates: { canonical: "/cast" },
+  openGraph: { url: "/cast" },
 };
 
 export default async function CastIndexPage() {
-  const data = await fetchPeople("cast", { first: 48 }).catch(() => null);
+  const data = await fetchPeople("cast", { first: 48 }).catch(ignoreMissing(null));
   const people = data?.items ?? [];
 
   return (

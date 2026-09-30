@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Rail } from "@/components/Rail";
 import { ScorePanel } from "@/components/ScorePanel";
-import { fetchScreenScore } from "@/lib/bridge";
-import { CATEGORIES } from "@/lib/config";
-import { fetchRelated, fetchTitleBySlug, fetchTitleSeo } from "@/lib/store";
-import { sanitizeWpHtml } from "@/lib/utils";
+import { JsonLd } from "@/components/JsonLd";
+import { fetchScreenScore, fetchTitleSeo } from "@/lib/bridge";
+import { CATEGORIES, SITE, productPermalink, siteUrl } from "@/lib/config";
+import { fetchRelated, fetchTitleBySlug } from "@/lib/store";
+import { sanitizeWpHtml, stripTags } from "@/lib/utils";
 
 export const revalidate = 300;
 export const dynamicParams = true;
+
+export function generateStaticParams(): { slug: string }[] {
+  return [];
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -18,23 +24,44 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const seo = await fetchTitleSeo(slug);
-  if (seo) {
-    return {
-      title: seo.title,
-      description: seo.description,
-      openGraph: {
-        title: seo.title,
-        description: seo.description,
-        images: seo.image ? [{ url: seo.image }] : undefined,
-      },
-    };
+  // Both start together: the Store API carries the structured fields (2.4s),
+  // the rendered page carries Yoast (0.2s) — serialising them made every cold
+  // render pay for both. The page component reuses both via React `cache`.
+  const [title, seo] = await Promise.all([
+    fetchTitleBySlug(slug),
+    fetchTitleSeo(productPermalink(slug)),
+  ]);
+
+  if (!title && !seo) {
+    return { title: "Judul tidak ditemukan", robots: { index: false } };
   }
-  const title = await fetchTitleBySlug(slug);
-  if (!title) return { title: "Judul tidak ditemukan" };
+
+  const path = `/content/${slug}`;
+  const name = seo?.title || title?.name || slug;
+  // Yoast ships an empty description for most products — fall back to the hook line.
+  const description = seo?.description || title?.excerpt || undefined;
+  const image = seo?.image || title?.images[0]?.src;
+
   return {
-    title: title.name,
-    description: title.excerpt ?? undefined,
+    // Yoast already appends the brand ("- Screen Score") — applying the
+    // `%s · ScreenScore` template on top produced "…- Screen Score · ScreenScore".
+    title: seo?.title ? { absolute: seo.title } : title?.name || slug,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      title: name,
+      description,
+      url: path,
+      siteName: SITE.name,
+      type: "article",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -43,35 +70,84 @@ export default async function TitlePage({ params }: Props) {
   const title = await fetchTitleBySlug(slug);
   if (!title) notFound();
 
-  const [score, related] = await Promise.all([
-    fetchScreenScore(title.permalink).catch(() => null),
-    fetchRelated(title.categories[0]?.slug ?? "film", title.slug, 8).catch(
-      () => [],
-    ),
-  ]);
+  // Score comes from the same HTML the metadata scrape already downloaded.
+  const score = await fetchScreenScore(title.permalink).catch(() => null);
 
   const category = title.categories[0];
   const poster = title.images[0];
+  const categoryPath = category ? CATEGORIES[category.slug]?.path ?? "/films" : null;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Beranda", item: siteUrl("/") },
+          ...(categoryPath && category
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: category.name,
+                  item: siteUrl(categoryPath),
+                },
+              ]
+            : []),
+          {
+            "@type": "ListItem",
+            position: categoryPath ? 3 : 2,
+            name: title.name,
+            item: siteUrl(`/content/${title.slug}`),
+          },
+        ],
+      },
+      {
+        "@type": "Product",
+        name: title.name,
+        image: title.images.map((i) => i.src),
+        description: title.excerpt ?? (stripTags(title.body).slice(0, 500) || undefined),
+        ...(category && { category: category.name }),
+        // Only publish ratings WordPress actually collected.
+        ...(title.reviewCount > 0 && {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: title.averageRating,
+            bestRating: 5,
+            worstRating: 0,
+            reviewCount: title.reviewCount,
+          },
+        }),
+        ...(score?.score != null && {
+          review: {
+            "@type": "Review",
+            name: score.label,
+            ...(stripTags(score.review) && {
+              reviewBody: stripTags(score.review).slice(0, 2000),
+            }),
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: score.score,
+              bestRating: 5,
+              worstRating: 0,
+            },
+            author: { "@type": "Organization", name: SITE.name },
+          },
+        }),
+      },
+    ],
+  };
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+      <JsonLd data={structuredData} />
       {/* breadcrumb */}
       <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-xs font-semibold text-muted">
         <Link href="/" className="hover:text-pink">Beranda</Link>
         <span>/</span>
-        {category && (
+        {category && categoryPath && (
           <>
-            <Link
-              href={
-                category.slug === "film" ? "/films"
-                  : category.slug === "series" ? "/series"
-                    : category.slug === "e-books" ? "/e-books"
-                      : category.slug === "game" ? "/game"
-                        : category.slug === "aplikasi" ? "/aplikasi"
-                          : "/films"
-              }
-              className="hover:text-pink"
-            >
+            <Link href={categoryPath} className="hover:text-pink">
               {category.name}
             </Link>
             <span>/</span>
@@ -94,6 +170,7 @@ export default async function TitlePage({ params }: Props) {
                 fill
                 priority
                 sizes="208px"
+                quality={70}
                 className="object-cover"
               />
             )}
@@ -120,6 +197,7 @@ export default async function TitlePage({ params }: Props) {
               {title.name}
             </h1>
 
+            {/* Lead line — also fills the header band on titles that ship no year/age/rating. */}
             {title.excerpt && (
               <p className="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-ink/80 sm:text-base">
                 {title.excerpt}
@@ -148,29 +226,72 @@ export default async function TitlePage({ params }: Props) {
         </div>
       </div>
 
-      {/* synopsis */}
-      {title.description && (
+      {/* synopsis — falls back to short_description when description is empty */}
+      {title.body && (
         <section className="mt-10">
           <h2 className="mb-3 text-xl font-extrabold sm:text-2xl">
-            Sinopsis Lengkap
+            {title.description ? "Sinopsis Lengkap" : "Tentang Judul Ini"}
           </h2>
           <div
-            className="prose-headings:font-bold max-w-3xl space-y-3 text-[15px] leading-relaxed text-ink/85 [&_b]:font-bold [&_li]:ml-5 [&_li]:list-disc [&_p]:my-2"
+            className="max-w-3xl space-y-3 text-[15px] leading-relaxed text-ink/85 [&_b]:font-bold [&_h2]:mt-6 [&_h2]:text-lg [&_h2]:font-extrabold [&_h3]:mt-5 [&_h3]:text-base [&_h3]:font-bold [&_h4]:mt-4 [&_h4]:font-bold [&_li]:ml-5 [&_li]:list-disc [&_p]:my-2 [&_table]:w-full [&_td]:border [&_td]:border-line [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-line [&_th]:px-2 [&_th]:py-1 [&_th]:text-left"
             dangerouslySetInnerHTML={{
-              __html: sanitizeWpHtml(title.description),
+              __html: sanitizeWpHtml(title.body),
             }}
           />
         </section>
       )}
 
-      {related.length > 0 && category && (
-        <Rail
-          heading="Mirip dengan ini"
-          blurb={`Lebih banyak ${category.name} pilihan`}
-          href={CATEGORIES[category.slug]?.path ?? "/films"}
-          items={related}
-        />
+      {/* Related titles cost a second Store API round trip (~2.8s cold), so
+          they stream in behind the article instead of holding up first paint. */}
+      {category && (
+        <Suspense fallback={<RelatedRailSkeleton />}>
+          <RelatedRail
+            categorySlug={category.slug}
+            excludeSlug={title.slug}
+            label={category.name}
+          />
+        </Suspense>
       )}
     </div>
+  );
+}
+
+async function RelatedRail({
+  categorySlug,
+  excludeSlug,
+  label,
+}: {
+  categorySlug: string;
+  excludeSlug: string;
+  label: string;
+}) {
+  const related = await fetchRelated(categorySlug, excludeSlug, 8).catch(
+    () => [],
+  );
+  if (!related.length) return null;
+  return (
+    <Rail
+      heading="Mirip dengan ini"
+      blurb={`Lebih banyak ${label} pilihan`}
+      href={CATEGORIES[categorySlug]?.path ?? "/films"}
+      items={related}
+    />
+  );
+}
+
+/** Matches a Rail's footprint so the streamed-in cards do not shift the page. */
+function RelatedRailSkeleton() {
+  return (
+    <section className="mt-12" aria-busy="true">
+      <div className="mb-4 h-7 w-52 rounded skeleton" />
+      <div className="flex gap-4 overflow-hidden">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="w-[156px] shrink-0">
+            <div className="skeleton aspect-[2/3] w-full rounded-lg" />
+            <div className="skeleton mt-2.5 h-4 w-4/5 rounded" />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

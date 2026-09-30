@@ -1,6 +1,7 @@
 import type { ScreenScore, Title } from "@/lib/types";
 import { sanitizeWpHtml } from "@/lib/utils";
 import { RatingStars } from "./RatingStars";
+import { ScoreNumber } from "./ScoreNumber";
 
 /**
  * THE signature moment — IMDb's yellow rating box, kid-edition:
@@ -18,13 +19,13 @@ export function ScorePanel({
   if (!score && !community) return null;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-surface">
+    <section className="overflow-hidden rounded-2xl border border-line bg-surface ss-reveal" ss-reveal="">
       <div className="flex flex-col gap-6 p-5 sm:flex-row sm:p-6">
         {/* score box */}
         {score?.score != null && (
           <div className="flex shrink-0 flex-col items-center rounded-xl bg-yellow px-6 py-5 sm:w-40">
             <span className="text-4xl font-extrabold tabular text-ink">
-              {score.score.toFixed(1)}
+              <ScoreNumber value={score.score} />
             </span>
             <span className="mt-1 text-xs font-bold uppercase tracking-wider text-ink/70">
               Screen Score

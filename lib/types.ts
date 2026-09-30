@@ -22,6 +22,13 @@ export interface Title {
   shortDescription: string;
   /** full description HTML (long synopsis) */
   description: string;
+  /**
+   * Body copy to render on the detail page. WooCommerce puts the long review
+   * in `description`, but a large share of products (most games) keep their
+   * entire article in `short_description` and leave `description` empty —
+   * this is whichever of the two actually has content.
+   */
+  body: string;
   images: TitleImage[];
   categories: Term[];
   tags: Term[];

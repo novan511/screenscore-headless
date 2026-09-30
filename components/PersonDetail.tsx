@@ -32,9 +32,11 @@ export async function PersonDetail({
   kind: PersonKind;
   path: string;
 }) {
+  // Deliberately un-caught: an unreachable WordPress must reach the error
+  // boundary rather than be reported as a missing person.
   const [person, bio] = await Promise.all([
-    fetchPerson(kind, path).catch(() => null),
-    fetchPersonBio(kind, path).catch(() => null),
+    fetchPerson(kind, path),
+    fetchPersonBio(kind, path),
   ]);
 
   if (!person && !bio) return null;
@@ -67,6 +69,7 @@ export async function PersonDetail({
                 alt={name}
                 fill
                 sizes="176px"
+                quality={70}
                 className="object-cover"
               />
             )}

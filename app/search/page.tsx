@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PosterCard, TitleGrid } from "@/components/PosterCard";
 import { SearchForm } from "@/components/SearchForm";
 import { fetchPeople } from "@/lib/graphql";
+import { ignoreMissing } from "@/lib/http";
 import { fetchTitles } from "@/lib/store";
 import type { Person } from "@/lib/types";
 
@@ -12,6 +13,10 @@ export const revalidate = 30;
 export const metadata: Metadata = {
   title: "Cari",
   description: "Cari judul dan orang di ScreenScore.",
+  // Query-string pages are infinite duplicates of each other.
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/search" },
+  openGraph: { url: "/search" },
 };
 
 export default async function SearchPage({
@@ -24,13 +29,13 @@ export default async function SearchPage({
 
   const [titleRes, castRes, creatorRes] = await Promise.all([
     query
-      ? fetchTitles({ search: query, perPage: 24, page: 1 }).catch(() => null)
+      ? fetchTitles({ search: query, perPage: 24, page: 1 }).catch(ignoreMissing(null))
       : Promise.resolve(null),
     query
-      ? fetchPeople("cast", { search: query, first: 8 }).catch(() => null)
+      ? fetchPeople("cast", { search: query, first: 8 }).catch(ignoreMissing(null))
       : Promise.resolve(null),
     query
-      ? fetchPeople("creator", { search: query, first: 8 }).catch(() => null)
+      ? fetchPeople("creator", { search: query, first: 8 }).catch(ignoreMissing(null))
       : Promise.resolve(null),
   ]);
 
@@ -95,6 +100,8 @@ export default async function SearchPage({
                       alt={p.title}
                       width={112}
                       height={112}
+                      sizes="112px"
+                      quality={70}
                       className="h-full w-full object-cover"
                     />
                   )}

@@ -15,6 +15,19 @@ export function clamp(text: string, max = 180): string {
   return text.slice(0, max - 1).trimEnd() + "…";
 }
 
+/** Collapse HTML to plain text. */
+export function stripTags(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#8217;|&#039;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#8211;/g, "–")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Decode the handful of entities WP leaves in review text. */
 export function decodeEntities(s: string): string {
   return s
@@ -28,14 +41,60 @@ export function decodeEntities(s: string): string {
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
 }
 
+/** Tags allowed through to dangerouslySetInnerHTML. Everything else is dropped. */
+const SAFE_TAGS = new Set([
+  "p", "br", "hr", "b", "strong", "i", "em", "u", "s", "sup", "sub",
+  "ul", "ol", "li", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6",
+  "span", "div", "figure", "figcaption", "table", "thead", "tbody", "tr", "th", "td",
+]);
+
 /**
- * Keep trusted WP HTML but strip everything except basic inline formatting.
+ * Keep trusted WP HTML but strip everything except basic formatting.
+ *
+ * Order matters: entities are decoded *before* tag parsing so `&lt;script&gt;`
+ * can never become a live tag, and every surviving tag is re-emitted from a
+ * whitelist with **all attributes removed** — a `<p onclick=…>` from a
+ * compromised or messy post must not reach the browser.
+ *
  * Used for synopses and editor reviews rendered via dangerouslySetInnerHTML.
  */
 export function sanitizeWpHtml(html: string, maxLength = 20000): string {
-  return decodeEntities(html)
-    .replace(/<(?!\/?(b|strong|i|em|br|p|ul|ol|li)\b)[^>]*>/gi, "")
-    .slice(0, maxLength);
+  const decoded = decodeEntities(html);
+
+  const cleaned = decoded.replace(/<[^>]*>/g, (tag) => {
+    const name = tag.match(/^<\/?([a-z0-9]+)/i)?.[1]?.toLowerCase() ?? "";
+    if (!SAFE_TAGS.has(name)) return "";
+    if (tag.startsWith("</")) return `</${name}>`;
+    if (name === "br") return "<br/>";
+    if (name === "hr") return "<hr/>";
+    return `<${name}>`;
+  });
+
+  return cleaned.length > maxLength
+    ? cleaned.slice(0, maxLength) + "…"
+    : cleaned;
+}
+
+/**
+ * Drop a leading year/age metadata list (`<ul><li>2020</li><li>7+</li></ul>`)
+ * so it is not re-rendered as the first bullet of the body copy.
+ */
+export function stripMetaList(html: string): string {
+  return html.replace(/^\s*<ul[^>]*>[\s\S]*?<\/ul>/i, (block) => {
+    const items = [...block.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) =>
+      stripTags(m[1]).trim(),
+    );
+    const isMeta =
+      items.length > 0 &&
+      items.every(
+        (t) =>
+          /^\d{4}$/.test(t) ||
+          /^\d{1,2}\+$/.test(t) ||
+          /^\d{1,2}$/.test(t) ||
+          /\d+\s*(tahun|thn|bulan|\+)/i.test(t),
+      );
+    return isMeta ? "" : block;
+  });
 }
 
 /** Pagination window helper. */

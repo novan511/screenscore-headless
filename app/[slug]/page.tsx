@@ -1,10 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchStaticPage } from "@/lib/graphql";
+import { ignoreMissing, isUpstreamError } from "@/lib/http";
+import { fetchPageSeo } from "@/lib/bridge";
 import { sanitizeWpHtml } from "@/lib/utils";
+import { SITE } from "@/lib/config";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
+
+/**
+ * Must exist (even empty) for Next to register this dynamic segment in
+ * `prerender-manifest.dynamicRoutes` — without it every hit renders with
+ * `Cache-Control: no-store` and ISR never kicks in.
+ */
+export function generateStaticParams(): { slug: string }[] {
+  return [];
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -12,13 +24,32 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  try {
-    const page = await fetchStaticPage(slug);
-    if (page) return { title: page.title };
-  } catch {
-    /* fall through */
-  }
-  return { title: slug.replace(/-/g, " ") };
+  const [seo, page] = await Promise.all([
+    fetchPageSeo(slug),
+    fetchStaticPage(slug).catch(ignoreMissing(null)),
+  ]);
+
+  const plainTitle = page?.title || slug.replace(/-/g, " ");
+  const description = seo?.description || undefined;
+  const path = `/${slug}`;
+
+  return {
+    // Yoast already appends the brand — don't stack the site template on top.
+    title: seo?.title ? { absolute: seo.title } : plainTitle,
+    ...(description && { description }),
+    alternates: { canonical: path },
+    openGraph: {
+      title: seo?.title || plainTitle,
+      ...(description && { description }),
+      url: path,
+      siteName: SITE.name,
+    },
+    twitter: {
+      card: "summary",
+      title: seo?.title || plainTitle,
+      ...(description && { description }),
+    },
+  };
 }
 
 /**
@@ -31,7 +62,9 @@ export default async function StaticPage({ params }: Props) {
   let page = null;
   try {
     page = await fetchStaticPage(slug);
-  } catch {
+  } catch (err) {
+    // WordPress being down is not proof that the page doesn't exist.
+    if (isUpstreamError(err)) throw err;
     page = null;
   }
   if (!page) notFound();

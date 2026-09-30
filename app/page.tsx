@@ -1,23 +1,33 @@
 import Link from "next/link";
 import { AgeChips } from "@/components/AgeChips";
 import { Hero } from "@/components/Hero";
+import { JsonLd } from "@/components/JsonLd";
 import { PosterCard, TitleGrid } from "@/components/PosterCard";
 import { Rail } from "@/components/Rail";
 import { SearchForm } from "@/components/SearchForm";
-import { CATEGORIES, CATEGORY_LIST } from "@/lib/config";
+import { CATEGORIES, CATEGORY_LIST, SITE, siteUrl } from "@/lib/config";
 import { fetchScreenScore } from "@/lib/bridge";
 import { fetchLatest } from "@/lib/store";
 import type { ScreenScore, Title } from "@/lib/types";
 
 export const revalidate = 300;
 
+const siteSearchAction = {
+  "@type": "SearchAction",
+  target: {
+    "@type": "EntryPoint",
+    urlTemplate: `${siteUrl("/search")}?q={search_term_string}`,
+  },
+  "query-input": "required name=search_term_string",
+};
+
 export default async function HomePage() {
   const [film, game, series, ebooks, apps] = await Promise.all([
-    safeLatest("film", 7),
-    safeLatest("game", 12),
-    safeLatest("series", 12),
-    safeLatest("e-books", 12),
-    safeLatest("aplikasi", 12),
+    fetchLatest("film", 7),
+    fetchLatest("game", 12),
+    fetchLatest("series", 12),
+    fetchLatest("e-books", 12),
+    fetchLatest("aplikasi", 12),
   ]);
 
   const heroItems = film.slice(0, 7);
@@ -30,6 +40,26 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              name: SITE.name,
+              url: siteUrl("/"),
+              inLanguage: "id",
+              potentialAction: siteSearchAction,
+            },
+            {
+              "@type": "Organization",
+              name: SITE.name,
+              url: siteUrl("/"),
+              description: SITE.tagline,
+            },
+          ],
+        }}
+      />
       {featured && (
         <Hero
           featured={featured}
@@ -40,7 +70,7 @@ export default async function HomePage() {
 
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
         {/* age-band entry — the kid-safety promise of the product */}
-        <section className="mt-10 rounded-2xl border border-line bg-surface p-5 sm:p-6">
+        <section className="mt-10 rounded-2xl border border-line bg-surface p-5 sm:p-6 ss-reveal" ss-reveal="">
           <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-lg font-extrabold">Pilih sesuai usia anak</h2>
             <span className="text-sm text-muted">
@@ -78,14 +108,14 @@ export default async function HomePage() {
         />
 
         {/* category doors */}
-        <section className="mt-14">
+        <section className="mt-14 ss-reveal" ss-reveal="">
           <h2 className="mb-4 text-xl font-extrabold sm:text-2xl">Jelajahi Semua</h2>
           <TitleGrid className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             {CATEGORY_LIST.map((c) => (
               <Link
                 key={c.slug}
                 href={c.path}
-                className="group rounded-2xl border border-line bg-surface p-5 transition hover:border-pink"
+                className="press group rounded-2xl border border-line bg-surface p-5 hover:border-pink"
               >
                 <span className="text-2xl">
                   {c.slug === "film" ? "🎬" : c.slug === "series" ? "📺" : c.slug === "game" ? "🎮" : c.slug === "e-books" ? "📚" : "📱"}
@@ -98,7 +128,7 @@ export default async function HomePage() {
         </section>
 
         {/* search CTA */}
-        <section className="mt-14 rounded-2xl bg-ink p-8 text-center text-white sm:p-10">
+        <section className="mt-14 rounded-2xl bg-ink p-8 text-center text-white sm:p-10 ss-reveal" ss-reveal="">
           <h2 className="text-2xl font-extrabold sm:text-3xl">
             Cari review tontonan favoritmu
           </h2>
@@ -112,7 +142,7 @@ export default async function HomePage() {
         </section>
 
         {/* latest reviewed grid */}
-        <section className="mt-14">
+        <section className="mt-14 ss-reveal" ss-reveal="">
           <h2 className="mb-4 text-xl font-extrabold sm:text-2xl">
             Baru Ditambahkan
           </h2>
@@ -127,16 +157,7 @@ export default async function HomePage() {
   );
 }
 
-async function safeLatest(cat: string, n: number): Promise<Title[]> {
-  try {
-    return await fetchLatest(cat, n);
-  } catch {
-    return [];
-  }
-}
-
-/** Editor scores for hero items only (bounded bridge fetches). */
-async function loadScores(items: Title[]): Promise<Record<string, ScreenScore | null>> {
+/** Editor scores for hero items only (bounded bridge fetches). */async function loadScores(items: Title[]): Promise<Record<string, ScreenScore | null>> {
   const entries = await Promise.all(
     items.slice(0, 7).map(async (t) => {
       try {

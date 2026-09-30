@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { CATEGORY_LIST } from "@/lib/config";
+
+export const metadata: Metadata = {
+  title: "Halaman tidak ditemukan",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
@@ -12,7 +18,7 @@ export default function NotFound() {
       <div className="mt-6 flex flex-wrap justify-center gap-2">
         <Link
           href="/"
-          className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white"
+          className="press rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white"
         >
           Ke Beranda
         </Link>
@@ -20,7 +26,7 @@ export default function NotFound() {
           <Link
             key={c.slug}
             href={c.path}
-            className="rounded-full border border-line px-5 py-2.5 text-sm font-bold hover:border-ink"
+            className="press rounded-full border border-line px-5 py-2.5 text-sm font-bold hover:border-ink"
           >
             {c.name}
           </Link>

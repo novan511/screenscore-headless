@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { fetchPeople } from "@/lib/graphql";
+import { ignoreMissing } from "@/lib/http";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Karakter",
   description: "Karakter film, serial, dan game di ScreenScore.",
+  alternates: { canonical: "/characters" },
+  openGraph: { url: "/characters" },
 };
 
 export default async function CharactersPage() {
-  const data = await fetchPeople("character", { first: 48 }).catch(() => null);
+  const data = await fetchPeople("character", { first: 48 }).catch(ignoreMissing(null));
   const people = data?.items ?? [];
 
   return (

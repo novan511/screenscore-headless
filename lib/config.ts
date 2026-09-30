@@ -6,6 +6,32 @@ export const WP_SITE = (
   process.env.NEXT_PUBLIC_WP_SITE ?? "https://screenscore.digitalmama.id"
 ).replace(/\/$/, "");
 
+/**
+ * Public origin of *this* frontend — canonical URLs, Open Graph and the
+ * sitemap must point at the site users actually read, not the WordPress
+ * backend. Defaults to WP_SITE because the headless frontend is meant to
+ * take over that domain; set NEXT_PUBLIC_SITE_URL while it lives elsewhere.
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? WP_SITE
+).replace(/\/$/, "");
+
+/** Absolute URL for a path on this frontend (canonical / og:url / sitemap). */
+export function siteUrl(path = ""): string {
+  if (!path) return SITE_URL;
+  return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/**
+ * Canonical WordPress URL for a product slug — every product is served at
+ * `/content/<slug>/` (verified across the whole catalogue), which lets the
+ * SEO scrape start in parallel with the Store API lookup instead of waiting
+ * for the permalink to come back. A miss degrades to no SEO tag, never a 404.
+ */
+export function productPermalink(slug: string): string {
+  return `${WP_SITE}/content/${encodeURIComponent(slug)}/`;
+}
+
 export const ENDPOINTS = {
   graphql: `${WP_SITE}/graphql`,
   store: `${WP_SITE}/wp-json/wc/store/v1`,

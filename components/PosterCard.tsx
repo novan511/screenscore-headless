@@ -7,14 +7,23 @@ import { cx } from "@/lib/utils";
 /**
  * Portrait poster card — the atom of every grid and rail.
  * Shows age chip + category + community rating; optional editor score chip.
+ *
+ * `width` is only for fixed-width rails. In the responsive grid it must be
+ * omitted so the card can fill its column — and `sizes` has to describe the
+ * real layout, otherwise the browser downloads a 168px srcset slot for a
+ * 400px column (or vice versa).
  */
+const GRID_SIZES =
+  "(min-width: 1024px) 16.6vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw";
+
 export function PosterCard({
   title,
   score,
-  width = 168,
+  width,
 }: {
   title: Title;
   score?: number | null;
+  /** Fixed pixel width for horizontal rails; omit inside a grid. */
   width?: number;
 }) {
   const poster = title.images[0];
@@ -25,7 +34,7 @@ export function PosterCard({
     <Link
       href={`/content/${title.slug}`}
       className="poster-card group block w-full"
-      style={{ width }}
+      style={width ? { width } : undefined}
     >
       <div
         className="relative overflow-hidden rounded-lg bg-surface"
@@ -36,7 +45,8 @@ export function PosterCard({
             src={poster.src}
             alt={poster.alt || title.name}
             fill
-            sizes={`${width}px`}
+            sizes={width ? `${width}px` : GRID_SIZES}
+            quality={70}
             className="object-cover"
           />
         ) : (
@@ -87,7 +97,7 @@ export function TitleGrid({
   return (
     <div
       className={cx(
-        "grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6",
+        "grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ss-stagger",
         className,
       )}
     >

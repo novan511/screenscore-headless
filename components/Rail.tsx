@@ -18,7 +18,7 @@ export function Rail({
 }) {
   if (!items.length) return null;
   return (
-    <section className="mt-12">
+    <section className="mt-12 ss-reveal" ss-reveal="">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold sm:text-2xl">{heading}</h2>
@@ -31,7 +31,7 @@ export function Rail({
           {moreLabel} →
         </Link>
       </div>
-      <div className="rail">
+      <div className="rail ss-stagger">
         {items.map((t) => (
           <PosterCard key={t.id} title={t} width={156} />
         ))}
