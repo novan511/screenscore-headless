@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { ENDPOINTS, SITE } from "./config";
 import { UpstreamError, wpFetch } from "./http";
-import { clamp, decodeEntities, stripMetaList, stripTags } from "./utils";
+import { clamp, decodeEntities, seededShuffle, stripMetaList, stripTags } from "./utils";
 import type { Paged, SeoMeta, Term, Title, TitleImage } from "./types";
 
 /**
@@ -95,19 +95,43 @@ export const fetchLatest = cache(
   },
 );
 
-/** Related titles from the same category, excluding the current slug. */export const fetchRelated = cache(
+/** Related titles: same-category pool enriched by shared tags, then
+ * deterministically shuffled per page (stable across ISR renders). */
+export const fetchRelated = cache(
   async (
     categorySlug: string,
     excludeSlug: string,
-    perPage = 8,
+    perPage = 10,
+    tagSlugs: string[] = [],
   ): Promise<Title[]> => {
-    const p = await fetchTitles({
-      category: categorySlug,
-      perPage: perPage + 4,
-      orderby: "date",
-      order: "desc",
-    });
-    return p.items.filter((t) => t.slug !== excludeSlug).slice(0, perPage);
+    // Tag matches first (most topically related), then the latest pool as
+    // filler. Newer catalogue entries carry no tags at all, so the category
+    // pool — deliberately wider than the old 12 — is the real workhorse.
+    const [latest, ...tagged] = await Promise.all([
+      fetchTitles({
+        category: categorySlug,
+        perPage: 30,
+        orderby: "date",
+        order: "desc",
+      }).catch(() => null),
+      ...tagSlugs.slice(0, 3).map((tag) =>
+        fetchTitles({ category: categorySlug, perPage: 12, tag }).catch(
+          () => null,
+        ),
+      ),
+    ]);
+
+    const seen = new Set<string>([excludeSlug]);
+    const pool: Title[] = [];
+    for (const batch of [...tagged, latest]) {
+      for (const t of batch?.items ?? []) {
+        if (seen.has(t.slug)) continue;
+        seen.add(t.slug);
+        pool.push(t);
+      }
+    }
+
+    return seededShuffle(pool, excludeSlug).slice(0, perPage);
   },
 );
 

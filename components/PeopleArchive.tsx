@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { fetchPeople } from "@/lib/graphql";
-import { ignoreMissing } from "@/lib/http";
+import { catchUpstreamBuild } from "@/lib/http";
 import type { PersonKind } from "@/lib/types";
 
 /**
@@ -25,8 +25,11 @@ export async function PeopleArchive({
   after?: string;
   perPage?: number;
 }) {
+  // `ignoreMissing` would fail the whole `vercel build` if WordPress blips
+  // during prerender — tolerate that window only, keep the runtime error
+  // boundary for real visitors.
   const data = await fetchPeople(kind, { first: perPage, after }).catch(
-    ignoreMissing(null),
+    catchUpstreamBuild(null),
   );
   const people = data?.items ?? [];
 

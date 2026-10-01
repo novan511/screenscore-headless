@@ -456,6 +456,7 @@ export default async function TitlePage({ params }: Props) {
             <RelatedRail
               categorySlug={category.slug}
               excludeSlug={title.slug}
+              tagSlugs={title.tags.map((t) => t.slug)}
               label={category.name}
             />
           </Suspense>
@@ -468,15 +469,20 @@ export default async function TitlePage({ params }: Props) {
 async function RelatedRail({
   categorySlug,
   excludeSlug,
+  tagSlugs,
   label,
 }: {
   categorySlug: string;
   excludeSlug: string;
+  tagSlugs: string[];
   label: string;
 }) {
-  const related = await fetchRelated(categorySlug, excludeSlug, 8).catch(
-    () => [],
-  );
+  const related = await fetchRelated(
+    categorySlug,
+    excludeSlug,
+    10,
+    tagSlugs,
+  ).catch(() => []);
   if (!related.length) return null;
   return (
     <Rail

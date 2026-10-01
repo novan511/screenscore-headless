@@ -10,6 +10,7 @@ import { CATEGORIES, CATEGORY_LIST, SITE, siteUrl } from "@/lib/config";
 import { fetchScreenScore } from "@/lib/bridge";
 import { fetchHomeArticles } from "@/lib/blog";
 import { fetchLatest } from "@/lib/store";
+import { catchUpstreamBuild } from "@/lib/http";
 import type { ScreenScore, Title } from "@/lib/types";
 
 export const revalidate = 300;
@@ -53,13 +54,17 @@ const SCORE_DIMENSIONS = [
 ] as const;
 
 export default async function HomePage() {
+  // Build-phase tolerance: if WordPress blips during `vercel build`, ship a
+  // degraded shell (replaced at first revalidation) instead of failing the
+  // whole deployment. Runtime behaviour is unchanged — visitors still get
+  // the error boundary with retry. See `catchUpstreamBuild`.
   const [film, game, series, ebooks, apps, articles] = await Promise.all([
-    fetchLatest("film", 7),
-    fetchLatest("game", 12),
-    fetchLatest("series", 12),
-    fetchLatest("e-books", 12),
-    fetchLatest("aplikasi", 12),
-    fetchHomeArticles(4),
+    fetchLatest("film", 7).catch(catchUpstreamBuild([])),
+    fetchLatest("game", 12).catch(catchUpstreamBuild([])),
+    fetchLatest("series", 12).catch(catchUpstreamBuild([])),
+    fetchLatest("e-books", 12).catch(catchUpstreamBuild([])),
+    fetchLatest("aplikasi", 12).catch(catchUpstreamBuild([])),
+    fetchHomeArticles(4).catch(catchUpstreamBuild([])),
   ]);
 
   const heroItems = film.slice(0, 7);

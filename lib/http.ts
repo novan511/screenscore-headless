@@ -43,6 +43,33 @@ const MAX_ATTEMPTS = 3;
 const ATTEMPT_TIMEOUT_MS = 8_000;
 
 /**
+ * Cap concurrent WordPress requests process-wide. Next prerenders every
+ * static page at once during `vercel build`, and the sitemap alone fans out
+ * to ~9 parallel paginated readers — from a faraway build region that burst
+ * trips Cloudflare rate-limiting (429s), and the retries then pile onto an
+ * already-slow origin until everything times out and the build fails.
+ * Four lanes stay comfortably under the limit while barely slowing a cold
+ * render (homepage: ~14 reads ≈ 4 waves).
+ */
+const MAX_CONCURRENT = 4;
+let inFlight = 0;
+const waiters: (() => void)[] = [];
+
+async function acquireSlot(): Promise<void> {
+  if (inFlight < MAX_CONCURRENT) {
+    inFlight++;
+    return;
+  }
+  await new Promise<void>((resolve) => waiters.push(resolve));
+  inFlight++;
+}
+
+function releaseSlot(): void {
+  inFlight--;
+  waiters.shift()?.();
+}
+
+/**
  * 403 rides along with the 5xx set because the origin's WAF answers bursts
  * (and UA-less requests) with a plain "403 Forbidden" page for a while, then
  * lets the same request through. After the retries it still surfaces as an
@@ -75,35 +102,66 @@ export async function wpFetch(
 
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(url, {
-        ...init,
-        headers: {
-          Accept: accept,
-          "User-Agent": DEFAULT_UA,
-          ...init?.headers,
-        },
-        signal: init?.signal ?? AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
-        next: { revalidate },
-      });
+  // Hold one lane for the whole attempt sequence (including backoff sleeps)
+  // so retries cannot pile onto an already-saturated origin either.
+  await acquireSlot();
+  try {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(url, {
+          ...init,
+          headers: {
+            Accept: accept,
+            "User-Agent": DEFAULT_UA,
+            ...init?.headers,
+          },
+          signal: init?.signal ?? AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+          next: { revalidate },
+        });
 
-      if (RETRYABLE_STATUS.has(res.status)) {
-        lastError = new UpstreamError(`HTTP ${res.status} for ${url}`);
-        // Nothing left to try — surface it instead of pretending the data is gone.
+        if (RETRYABLE_STATUS.has(res.status)) {
+          lastError = new UpstreamError(`HTTP ${res.status} for ${url}`);
+          // Nothing left to try — surface it instead of pretending the data is gone.
+          if (attempt === MAX_ATTEMPTS) break;
+        } else {
+          return res;
+        }
+      } catch (err) {
+        lastError = err;
         if (attempt === MAX_ATTEMPTS) break;
-      } else {
-        return res;
       }
-    } catch (err) {
-      lastError = err;
-      if (attempt === MAX_ATTEMPTS) break;
+      // Exponential-ish backoff: 250ms, 750ms — quick enough for a page render.
+      await delay(250 * attempt * 3);
     }
-    // Exponential-ish backoff: 250ms, 750ms — quick enough for a page render.
-    await delay(250 * attempt * 3);
-  }
 
-  throw new UpstreamError(`WordPress unreachable: ${url}`, { cause: lastError });
+    throw new UpstreamError(`WordPress unreachable: ${url}`, { cause: lastError });
+  } finally {
+    releaseSlot();
+  }
+}
+
+/**
+ * Build-phase-only fallback for upstream failures.
+ *
+ * Static pages are prerendered during `vercel build`; if WordPress blips in
+ * that exact window the whole deployment fails. Catching *only* while
+ * `NEXT_PHASE === "phase-production-build"` keeps the runtime contract
+ * intact: real visitors still get the error boundary with retry, and ISR
+ * still serves the last good copy — the degraded build output is replaced
+ * at the first revalidation after WordPress recovers.
+ *
+ * Mirrors the `ignoreMissing` style: `.catch(catchUpstreamBuild(fallback))`.
+ */
+export function catchUpstreamBuild<T>(fallback: T): (err: unknown) => T {
+  return (err: unknown): T => {
+    if (
+      isUpstreamError(err) &&
+      process.env.NEXT_PHASE === "phase-production-build"
+    ) {
+      return fallback;
+    }
+    throw err;
+  };
 }
 
 /**

@@ -197,6 +197,33 @@ export function pageWindow(page: number, totalPages: number, span = 2): number[]
 }
 
 /**
+ * Deterministic shuffle (mulberry32 over a string hash): the same seed
+ * always yields the same order, so ISR output stays stable while different
+ * pages get different mixes. Used for "related" rails — pure recency made
+ * every rail look identical.
+ */
+export function seededShuffle<T>(items: T[], seed: string): T[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const rand = () => {
+    h |= 0;
+    h = (h + 0x6d2b79f5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/**
  * Turn a scraped Yoast description into a usable meta description.
  *
  * Yoast often auto-generates these by concatenating the page's own opening
