@@ -21,21 +21,25 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return personMetadata("cast", slug, personCanonical("cast", slug));
+  return personMetadata(
+    "pro-player",
+    slug,
+    personCanonical("pro-player", slug),
+  );
 }
 
-export default async function CastDetailPage({
+export default async function ProPlayerDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const view = await PersonDetail({ kind: "cast", path: slug });
+  const view = await PersonDetail({ kind: "pro-player", path: slug });
   if (!view) notFound();
   return (
     <>
       {view}
-      <RelatedPeopleBlock kind="cast" path={slug} />
+      <RelatedPeopleBlock kind="pro-player" path={slug} />
     </>
   );
 }

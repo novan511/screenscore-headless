@@ -21,6 +21,9 @@ const STATIC_PATHS = [
   "/privacy-policy",
   "/cast",
   "/characters",
+  "/idol",
+  "/pro-player",
+  "/gadget",
 ];
 
 /** How many URLs per WordPress batch (Store API caps at 100). */
@@ -56,6 +59,9 @@ const PEOPLE_FIELD = {
   creator: "allCreator",
   character: "characters",
   song: "songs",
+  idol: "idols",
+  proPlayer: "proPlayers",
+  gadget: "allGadget",
 } as const;
 
 /**
@@ -146,13 +152,16 @@ async function fetchPeoplePaths(
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const [productPaths, castPaths, creatorPaths, characterPaths, songPaths, blogPosts] =
+  const [productPaths, castPaths, creatorPaths, characterPaths, songPaths, idolPaths, proPlayerPaths, gadgetPaths, blogPosts] =
     await Promise.all([
       fetchProductPaths(),
       fetchPeoplePaths(PEOPLE_FIELD.cast),
       fetchPeoplePaths(PEOPLE_FIELD.creator),
       fetchPeoplePaths(PEOPLE_FIELD.character),
       fetchPeoplePaths(PEOPLE_FIELD.song),
+      fetchPeoplePaths(PEOPLE_FIELD.idol),
+      fetchPeoplePaths(PEOPLE_FIELD.proPlayer),
+      fetchPeoplePaths(PEOPLE_FIELD.gadget),
       fetchBlogPosts(),
     ]);
 
@@ -180,7 +189,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const people = [...castPaths, ...creatorPaths, ...characterPaths, ...songPaths];
+  const people = [...castPaths, ...creatorPaths, ...characterPaths, ...songPaths, ...idolPaths, ...proPlayerPaths, ...gadgetPaths];
   const peopleEntries: MetadataRoute.Sitemap = people.map((path) => ({
     url: siteUrl(path),
     lastModified: now,

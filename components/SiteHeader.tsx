@@ -17,17 +17,17 @@ export function SiteHeader() {
         className="h-1 w-full bg-gradient-to-r from-pink via-yellow to-sky-600"
       />
       <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6">
-        <Link href="/" className="shrink-0 text-2xl font-extrabold tracking-tight">
+        <Link href="/" className="inline-flex min-h-11 shrink-0 items-center text-2xl font-extrabold tracking-tight" aria-label="ScreenScore — beranda">
           <span className="text-ink">screen</span>
           <span className="text-pink">score</span>
         </Link>
 
-        <nav className="hidden min-w-0 flex-1 items-center gap-5 lg:flex">
+        <nav className="hidden min-w-0 flex-1 items-center gap-1 lg:flex">
           {CATEGORY_LIST.map((c) => (
             <Link
               key={c.slug}
               href={c.path}
-              className="text-sm font-semibold text-ink/75 transition hover:text-pink"
+              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink"
             >
               {c.name}
             </Link>
@@ -36,7 +36,7 @@ export function SiteHeader() {
             <Link
               key={s.href}
               href={s.href}
-              className="text-sm font-semibold text-ink/75 transition hover:text-pink"
+              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink"
             >
               {s.label}
             </Link>
@@ -49,22 +49,22 @@ export function SiteHeader() {
 
         {/* mobile: CSS-only menu */}
         <details className="relative ml-auto lg:hidden">
-          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-ink/80 transition hover:bg-blush hover:text-pink">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-ink/80 transition hover:bg-blush hover:text-pink">
             <span aria-hidden className="menu-bars">
               ☰
             </span>
             Menu
           </summary>
-          <div className="menu-panel absolute right-0 top-full mt-2 w-64 rounded-xl border border-line bg-white p-4 shadow-2xl">
+          <div className="menu-panel absolute right-0 top-full mt-2 max-h-[70vh] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-line bg-white p-4 shadow-2xl">
             <div className="mb-3">
               <SearchForm />
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {CATEGORY_LIST.map((c) => (
                 <li key={c.slug}>
                   <Link
                     href={c.path}
-                    className="block rounded px-2 py-1.5 text-sm font-semibold hover:bg-blush hover:text-pink"
+                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink"
                   >
                     {c.name}
                   </Link>
@@ -74,7 +74,7 @@ export function SiteHeader() {
                 <li key={s.href}>
                   <Link
                     href={s.href}
-                    className="block rounded px-2 py-1.5 text-sm font-semibold hover:bg-blush hover:text-pink"
+                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink"
                   >
                     {s.label}
                   </Link>

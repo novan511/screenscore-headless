@@ -42,7 +42,21 @@ export function ignoreMissing<T>(fallback: T): (err: unknown) => T {
 const MAX_ATTEMPTS = 3;
 const ATTEMPT_TIMEOUT_MS = 8_000;
 
-const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
+/**
+ * 403 rides along with the 5xx set because the origin's WAF answers bursts
+ * (and UA-less requests) with a plain "403 Forbidden" page for a while, then
+ * lets the same request through. After the retries it still surfaces as an
+ * UpstreamError, so ISR keeps serving the last good copy instead of caching
+ * a confident failure.
+ */
+const RETRYABLE_STATUS = new Set([403, 408, 425, 429, 500, 502, 503, 504]);
+
+/**
+ * Identify ourselves: undici sends no User-Agent by default, which some
+ * WAFs treat as bot traffic. Callers can still override via init.headers.
+ */
+const DEFAULT_UA =
+  "Mozilla/5.0 (compatible; ScreenScore/1.0; +https://screenscore.digitalmama.id)";
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,7 +79,11 @@ export async function wpFetch(
     try {
       const res = await fetch(url, {
         ...init,
-        headers: { Accept: accept, ...init?.headers },
+        headers: {
+          Accept: accept,
+          "User-Agent": DEFAULT_UA,
+          ...init?.headers,
+        },
         signal: init?.signal ?? AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
         next: { revalidate },
       });

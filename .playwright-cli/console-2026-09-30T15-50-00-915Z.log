@@ -1,0 +1,2 @@
+[    1031ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3200/_next/static/chunks/app/blog/page.js:0
+[    1603ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630

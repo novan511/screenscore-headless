@@ -42,7 +42,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path(films|series|game|e-books|aplikasi|search|blog)",
+        source:
+          "/:path(films|series|game|e-books|aplikasi|search|blog|idol|pro-player|gadget)",
         headers: [
           {
             key: "Cache-Control",
@@ -51,6 +52,42 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+
+  /**
+   * Legacy WordPress URL parity for the headless takeover.
+   *
+   * - `/content-category/<cat>/` is WooCommerce's native term archive; the
+   *   headless frontend replaces it with /films, /series, … — 301 them so no
+   *   indexed URL dies.
+   * - cart/checkout/my-account/register are shop-functional pages whose
+   *   shortcodes cannot render headless; send them back to WordPress instead
+   *   of serving a broken copy.
+   */
+  async redirects() {
+    const categoryRedirects = [
+      { slug: "film", path: "/films" },
+      { slug: "series", path: "/series" },
+      { slug: "e-books", path: "/e-books" },
+      { slug: "game", path: "/game" },
+      { slug: "aplikasi", path: "/aplikasi" },
+      { slug: "animation", path: "/films" },
+      { slug: "anime", path: "/series" },
+    ].map(({ slug, path }) => ({
+      source: `/content-category/${slug}`,
+      destination: path,
+      permanent: true,
+    }));
+
+    const shopBackToWp = ["cart", "checkout", "my-account", "register"].map(
+      (slug) => ({
+        source: `/${slug}`,
+        destination: `${WP_SITE}/${slug}/`,
+        permanent: false,
+      }),
+    );
+
+    return [...categoryRedirects, ...shopBackToWp];
   },
 };
 

@@ -149,7 +149,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/blog"
-                className="shrink-0 text-sm font-bold text-pink hover:underline"
+                className="inline-flex min-h-11 shrink-0 items-center rounded-md px-1 text-sm font-bold text-pink hover:underline"
               >
                 Lihat semua artikel →
               </Link>
@@ -199,7 +199,7 @@ export default async function HomePage() {
               </p>
               <Link
                 href="/tentang-kami"
-                className="press mt-4 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-ink border border-line hover:border-pink hover:text-pink"
+                className="press mt-4 inline-flex min-h-11 items-center rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-ink border border-line hover:border-pink hover:text-pink"
               >
                 Pelajari metodologi kami →
               </Link>

@@ -78,7 +78,14 @@ export interface Person {
   kind: PersonKind;
 }
 
-export type PersonKind = "cast" | "creator" | "character" | "song" | "idol";
+export type PersonKind =
+  | "cast"
+  | "creator"
+  | "character"
+  | "song"
+  | "idol"
+  | "pro-player"
+  | "gadget";
 
 export interface StaticPage {
   title: string;

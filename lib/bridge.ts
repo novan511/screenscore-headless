@@ -180,6 +180,8 @@ export const fetchPersonBio = cache(async (
     character: "character",
     song: "song",
     idol: "idol",
+    "pro-player": "pro-player",
+    gadget: "gadget",
   };
   const url = `${WP_SITE}/${base[kind]}/${pathSlug.replace(/^\/+/, "")}/`;
   try {

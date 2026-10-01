@@ -66,7 +66,9 @@ export async function fetchPeople(
       : kind === "creator" ? "allCreator"
         : kind === "character" ? "characters"
           : kind === "idol" ? "idols"
-            : "songs";
+            : kind === "pro-player" ? "proPlayers"
+              : kind === "gadget" ? "allGadget"
+                : "songs";
   const searchArg = opts.search ? `, where: { search: "${escapeGql(opts.search)}" }` : "";
   const afterArg = opts.after ? `, after: "${opts.after}"` : "";
   const data = await gql<Record<string, {
@@ -99,7 +101,9 @@ export const fetchPerson = cache(async (
       : kind === "creator" ? "creator"
         : kind === "character" ? "character"
           : kind === "idol" ? "idol"
-            : "song";
+            : kind === "pro-player" ? "proPlayer"
+              : kind === "gadget" ? "gadget"
+                : "song";
   try {
     const data = await gql<Record<string, GqlPersonNode | null>>(
       `{ ${field}(id: "${escapeGql(slugOrUri)}", idType: SLUG) { ${PERSON_FIELDS} } }`,

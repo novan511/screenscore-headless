@@ -1,0 +1,222 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "screenscore" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e6]:
+        - link "Film" [ref=e7] [cursor=pointer]:
+          - /url: /films
+        - link "Serial" [ref=e8] [cursor=pointer]:
+          - /url: /series
+        - link "E-Books" [ref=e9] [cursor=pointer]:
+          - /url: /e-books
+        - link "Game" [ref=e10] [cursor=pointer]:
+          - /url: /game
+        - link "Aplikasi" [ref=e11] [cursor=pointer]:
+          - /url: /aplikasi
+        - link "Artikel" [ref=e12] [cursor=pointer]:
+          - /url: /blog
+        - link "Orang" [ref=e13] [cursor=pointer]:
+          - /url: /cast
+        - link "Tentang" [ref=e14] [cursor=pointer]:
+          - /url: /tentang-kami
+      - search [ref=e16]:
+        - generic [ref=e17]: Cari judul
+        - searchbox "Cari judul Cari judul" [ref=e18]
+  - main [ref=e19]:
+    - generic [ref=e21]:
+      - navigation "Breadcrumb" [ref=e22]:
+        - list [ref=e23]:
+          - listitem [ref=e24]:
+            - link "Beranda" [ref=e25] [cursor=pointer]:
+              - /url: /
+          - listitem [aria-hidden] [ref=e26]: ›
+          - listitem [ref=e27]: Artikel
+      - generic [ref=e28]:
+        - heading "📚 Artikel & Tips untuk Orang Tua" [level=1] [ref=e29]
+        - paragraph [ref=e30]: Tips, panduan, dan kabar digital pilihan dari redaksi ScreenScore — dibuat untuk orang tua yang ingin tontonan dan mainan anak lebih aman.
+      - navigation "Kategori artikel" [ref=e31]:
+        - link "Semua Artikel" [ref=e32] [cursor=pointer]:
+          - /url: /blog
+        - link "News" [ref=e33] [cursor=pointer]:
+          - /url: /blog?cat=news
+        - link "Tips" [ref=e34] [cursor=pointer]:
+          - /url: /blog?cat=tips
+        - link "Ulasan" [ref=e35] [cursor=pointer]:
+          - /url: /blog?cat=ulasan
+      - generic [ref=e36]:
+        - link [ref=e37] [cursor=pointer]:
+          - /url: /blog/monster-hunter-wilds-rilis-update-ver-1-042-00-00-dengan-perbaikan-bug-dan-penyesuaian-gameplay
+          - generic [ref=e39]:
+            - generic [aria-hidden] [ref=e40]: 📝
+            - text: Artikel
+          - heading "Monster Hunter Wilds Rilis Update Ver.1.042.00.00 dengan Perbaikan Bug dan Penyesuaian Gameplay" [level=3] [ref=e41]
+          - paragraph [ref=e42]: Capcom resmi merilis pembaruan besar untuk Monster Hunter Wilds dengan versi 1.042.00.00 yang menghadirkan sejumlah perbaikan penting serta penambahan fitur baru. Salah satu perubahan paling signifikan adalah dukungan transfer data simpanan dari Prologue Demo ke versi penuh permainan, memungkinkan pemain yang telah mencoba demo untuk melanjutkan progres mereka tanpa harus mengulang dari awal. Selain itu, [&hellip;]
+          - generic [ref=e43]:
+            - time [ref=e44]: 4 Agustus 2026
+            - generic [aria-hidden] [ref=e45]: Baca →
+        - link [ref=e46] [cursor=pointer]:
+          - /url: /blog/throne-and-liberty-rilis-update-4-5-0-hadirkan-archboss-ramux-hingga-deretan-senjata-dan-konten-endgame-baru
+          - generic [ref=e48]:
+            - generic [aria-hidden] [ref=e49]: 📝
+            - text: Artikel
+          - heading "Throne and Liberty Rilis Update 4.5.0, Hadirkan Archboss Ramux hingga Deretan Senjata dan Konten Endgame Baru" [level=3] [ref=e50]
+          - paragraph [ref=e51]: NCSOFT dan Amazon Games resmi menggulirkan Update 4.5.0 untuk gim MMORPG Throne and Liberty seusai jendela pemeliharaan server. Pembaruan besar ini menandai kehadiran Archboss baru bernama Ramux yang kini dapat ditantang pemain, lengkap dengan jadwal kemunculan reguler setiap Selasa dan Jumat pukul 19.00 serta 22.00. Selain bos anyar, pengembang menambahkan Dimensional Trials dan Guild Raids [&hellip;]
+          - generic [ref=e52]:
+            - time [ref=e53]: 1 Agustus 2026
+            - generic [aria-hidden] [ref=e54]: Baca →
+        - link [ref=e55] [cursor=pointer]:
+          - /url: /blog/total-war-warhammer-iii-gulirkan-hotfix-8-0-2-seimbangkan-tiger-warriors-dan-tuntaskan-beragam-crash
+          - generic [ref=e57]:
+            - generic [aria-hidden] [ref=e58]: 📝
+            - text: Artikel
+          - 'heading "Total War: Warhammer III Gulirkan Hotfix 8.0.2, Seimbangkan Tiger Warriors dan Tuntaskan Beragam Crash" [level=3] [ref=e59]'
+          - paragraph [ref=e60]: "Creative Assembly resmi menggulirkan Hotfix 8.0.2 untuk gim strategi Total War: Warhammer III. Pembaruan ini menghadirkan penyeimbangan biaya pada sejumlah unit Tiger Warriors milik faksi Cathay, perbaikan beberapa crash, serta penyelesaian berbagai bug pada mode kampanye dan pertempuran. Pada sisi penyeimbangan, biaya rekrutmen dan pemeliharaan beberapa varian Tiger Warriors seperti Iron Claws, Stalkers, dan Dual [&hellip;]"
+          - generic [ref=e61]:
+            - time [ref=e62]: 1 Agustus 2026
+            - generic [aria-hidden] [ref=e63]: Baca →
+        - link [ref=e64] [cursor=pointer]:
+          - /url: /blog/beamng-drive-rilis-rangkaian-hotfix-untuk-versi-0-39-benahi-sistem-mod-hingga-perbaikan-renderer-d3d12
+          - generic [ref=e66]:
+            - generic [aria-hidden] [ref=e67]: 📝
+            - text: Artikel
+          - heading "BeamNG.drive Rilis Rangkaian Hotfix untuk Versi 0.39, Benahi Sistem Mod hingga Perbaikan Renderer D3D12" [level=3] [ref=e68]
+          - paragraph [ref=e69]: BeamNG resmi menggulirkan serangkaian hotfix untuk pembaruan versi 0.39 pada gim simulasi mengemudi BeamNG.drive. Perbaikan yang dibagikan melalui changelog v0.39.1 dan v0.39.2 ini berfokus menuntaskan sejumlah persoalan paling kritis yang dilaporkan pemain sejak peluncuran versi mayor terbaru. Salah satu sorotan utama adalah pembenahan pada Mod Manager, di mana proses pembaruan bagi pengguna yang memasang mod [&hellip;]
+          - generic [ref=e70]:
+            - time [ref=e71]: 1 Agustus 2026
+            - generic [aria-hidden] [ref=e72]: Baca →
+        - link [ref=e73] [cursor=pointer]:
+          - /url: /blog/world-war-z-luncurkan-limitless-strain-update-hadirkan-tujuh-weapon-perk-baru-dan-dukungan-xbox-play-anywhere
+          - generic [ref=e75]:
+            - generic [aria-hidden] [ref=e76]: 📝
+            - text: Artikel
+          - heading "World War Z Luncurkan Limitless Strain Update, Hadirkan Tujuh Weapon Perk Baru dan Dukungan XBOX Play Anywhere" [level=3] [ref=e77]
+          - paragraph [ref=e78]: Saber Interactive resmi meluncurkan pembaruan Limitless Strain untuk gim tembak-menembak kooperatif World War Z. Pembaruan yang kini sudah tersedia bagi seluruh pemain ini menghadirkan beragam konten gratis, mulai dari perk senjata, tantangan harian, mutator, hingga penyesuaian antarmuka. Sebagai sorotan utama, pengembang menambahkan tujuh Weapon Perk baru yakni Triple Shot, Home Stretch, Dance Till The End, [&hellip;]
+          - generic [ref=e79]:
+            - time [ref=e80]: 1 Agustus 2026
+            - generic [aria-hidden] [ref=e81]: Baca →
+        - link [ref=e82] [cursor=pointer]:
+          - /url: /blog/granblue-fantasy-relink-rilis-pembaruan-ver-2-0-3-tuntaskan-beragam-bug-softlock-dan-crash-pada-mode-co-op-online
+          - generic [ref=e84]:
+            - generic [aria-hidden] [ref=e85]: 📝
+            - text: Artikel
+          - 'heading "Granblue Fantasy: Relink Rilis Pembaruan Ver. 2.0.3, Tuntaskan Beragam Bug Softlock dan Crash pada Mode Co-op Online" [level=3] [ref=e86]'
+          - paragraph [ref=e87]: "Cygames resmi merilis pembaruan Ver. 2.0.3 untuk gim aksi RPG Granblue Fantasy: Relink. Pembaruan yang kini sudah tersedia bagi seluruh pemain ini berfokus pada perbaikan stabilitas dan berbagai bug, terutama pada aspek permainan daring. Pengembang menuntaskan sejumlah persoalan pada fitur Backup Characters, termasuk bug intermiten yang menyebabkan koneksi jaringan menggantung saat mengambil daftar backup, serta [&hellip;]"
+          - generic [ref=e88]:
+            - time [ref=e89]: 1 Agustus 2026
+            - generic [aria-hidden] [ref=e90]: Baca →
+        - link [ref=e91] [cursor=pointer]:
+          - /url: /blog/deadlock-rombak-total-sistem-matchmaking-hadirkan-mode-ranked-dengan-sistem-peringkat-dan-musim-kompetitif
+          - generic [ref=e93]:
+            - generic [aria-hidden] [ref=e94]: 📝
+            - text: Artikel
+          - heading "Deadlock Rombak Total Sistem Matchmaking, Hadirkan Mode Ranked dengan Sistem Peringkat dan Musim Kompetitif" [level=3] [ref=e95]
+          - paragraph [ref=e96]: Valve resmi menggulirkan pembaruan besar pada sistem matchmaking gim MOBA-penembak Deadlock. Pembaruan yang kini sudah tersedia bagi seluruh pemain ini merombak total cara kerja sistem penjodohan pemain sekaligus memperkenalkan dua mode terpisah, yakni Standard Mode tanpa peringkat dan Ranked Mode yang kompetitif. Standard Mode dirancang sebagai opsi bermain santai bersama teman tanpa memengaruhi peringkat, tanpa [&hellip;]
+          - generic [ref=e97]:
+            - time [ref=e98]: 31 Juli 2026
+            - generic [aria-hidden] [ref=e99]: Baca →
+        - link [ref=e100] [cursor=pointer]:
+          - /url: /blog/gunfire-reborn-gulirkan-season-8-mid-season-update-part-i-hadirkan-soul-pendant-baru-dan-rombak-mekanik-senjata-dart
+          - generic [ref=e102]:
+            - generic [aria-hidden] [ref=e103]: 📝
+            - text: Artikel
+          - heading "Gunfire Reborn Gulirkan Season 8 Mid-Season Update Part I, Hadirkan Soul Pendant Baru dan Rombak Mekanik Senjata Dart" [level=3] [ref=e104]
+          - paragraph [ref=e105]: Gunfire Reborn Studio resmi menggulirkan pembaruan pertengahan musim untuk Season 8 bertajuk Myriad Souls melalui Update Notes tertanggal 30 Juli. Pembaruan yang sudah tersedia bagi seluruh pemain gim tembak-menembak roguelite ini menghadirkan penyegaran pada sistem musiman sekaligus perombakan signifikan pada sejumlah senjata. Pengembang menambahkan dua Soul Pendant baru serta serangkaian efek Soul Jade anyar yang [&hellip;]
+          - generic [ref=e106]:
+            - time [ref=e107]: 31 Juli 2026
+            - generic [aria-hidden] [ref=e108]: Baca →
+        - link [ref=e109] [cursor=pointer]:
+          - /url: /blog/escape-the-backrooms-rilis-patch-steam-besar-hadirkan-cross-platform-dan-sistem-auto-save
+          - generic [ref=e111]:
+            - generic [aria-hidden] [ref=e112]: 📝
+            - text: Artikel
+          - heading "Escape the Backrooms Rilis Patch Steam Besar, Hadirkan Cross-Platform dan Sistem Auto-Save" [level=3] [ref=e113]
+          - paragraph [ref=e114]: Pengembang gim horor kooperatif Escape the Backrooms resmi menggulirkan pembaruan besar untuk versi Steam yang bertepatan dengan peluncuran gim di konsol PlayStation 5 dan Xbox Series X|S. Pembaruan ini menghadirkan sistem matchmaking cross-platform yang ditenagai oleh Epic Online Services tanpa mengharuskan pemain masuk ke akun Epic, serta fitur lobby code baru yang memudahkan pemain dari [&hellip;]
+          - generic [ref=e115]:
+            - time [ref=e116]: 30 Juli 2026
+            - generic [aria-hidden] [ref=e117]: Baca →
+        - link [ref=e118] [cursor=pointer]:
+          - /url: /blog/palworld-rilis-patch-v1-0-2-perbaiki-crash-multiplayer-dan-puluhan-bug-gameplay
+          - generic [ref=e120]:
+            - generic [aria-hidden] [ref=e121]: 📝
+            - text: Artikel
+          - heading "Palworld Rilis Patch v1.0.2, Perbaiki Crash Multiplayer dan Puluhan Bug Gameplay" [level=3] [ref=e122]
+          - paragraph [ref=e123]: Pocketpair resmi merilis pembaruan v1.0.2 untuk gim survival open-world Palworld yang berfokus pada peningkatan stabilitas dan perbaikan berbagai masalah teknis. Pembaruan ini menyasar sejumlah bug kritis pada mode multiplayer, termasuk crash dan disconnection yang kerap terjadi selama pertempuran melawan Panthalus di dedicated server, serta masalah tampilan terrain yang tidak muncul dengan benar saat host berpindah [&hellip;]
+          - generic [ref=e124]:
+            - time [ref=e125]: 30 Juli 2026
+            - generic [aria-hidden] [ref=e126]: Baca →
+        - link [ref=e127] [cursor=pointer]:
+          - /url: /blog/7-days-to-die-rilis-update-stabil-v3-1-0-henpocalypse-hadirkan-peternakan-ayam-dan-hotfix-bug-undangan-multiplayer
+          - generic [ref=e129]:
+            - generic [aria-hidden] [ref=e130]: 📝
+            - text: Artikel
+          - heading "7 Days to Die Rilis Update Stabil V3.1.0 Henpocalypse, Hadirkan Peternakan Ayam dan Hotfix Bug Undangan Multiplayer" [level=3] [ref=e131]
+          - paragraph [ref=e132]: The Fun Pimps resmi menggulirkan pembaruan stabil V3.1.0 bertajuk Henpocalypse untuk gim survival horor 7 Days to Die. Pembaruan yang kini sudah tersedia untuk seluruh pemain ini memperkenalkan mekanik peternakan ayam sebagai fitur andalan, sekaligus membawa hotfix untuk bug undangan multiplayer yang sebelumnya mengganggu pengalaman bermain kooperatif. Bagi pemain yang menggunakan dedicated server, pengembang mengingatkan [&hellip;]
+          - generic [ref=e133]:
+            - time [ref=e134]: 30 Juli 2026
+            - generic [aria-hidden] [ref=e135]: Baca →
+        - link [ref=e136] [cursor=pointer]:
+          - /url: /blog/nebulous-fleet-command-rilis-patch-0-6-2-5-perbaiki-puluhan-bug-kampanye-dan-stabilitas
+          - generic [ref=e138]:
+            - generic [aria-hidden] [ref=e139]: 📝
+            - text: Artikel
+          - 'heading "Nebulous: Fleet Command Rilis Patch 0.6.2.5, Perbaiki Puluhan Bug Kampanye dan Stabilitas" [level=3] [ref=e140]'
+          - paragraph [ref=e141]: "Pengembang gim strategi taktis luar angkasa Nebulous: Fleet Command kembali menggulirkan pembaruan perbaikan besar melalui Patch 0.6.2.5, yang kini sudah tersedia di Steam. Pembaruan ini secara khusus menyasar sejumlah besar bug terkait mode kampanye yang telah dilaporkan oleh komunitas, sekaligus memperkenalkan beberapa penyempurnaan teknis seperti sistem safe-invoke baru untuk mencegah exception pada event handler yang [&hellip;]"
+          - generic [ref=e142]:
+            - time [ref=e143]: 29 Juli 2026
+            - generic [aria-hidden] [ref=e144]: Baca →
+      - navigation "Paginasi" [ref=e145]:
+        - link "1" [ref=e146] [cursor=pointer]:
+          - /url: /blog
+        - link "2" [ref=e147] [cursor=pointer]:
+          - /url: /blog?page=2
+        - link "3" [ref=e148] [cursor=pointer]:
+          - /url: /blog?page=3
+        - generic [ref=e149]: …
+        - link "Next →" [ref=e150] [cursor=pointer]:
+          - /url: /blog?page=2
+  - contentinfo [ref=e151]:
+    - generic [ref=e152]:
+      - generic [ref=e153]:
+        - generic [ref=e154]: screenscore
+        - paragraph [ref=e155]: Review konten terbaik untuk anak. Kurasi jujur dari orang tua, untuk tontonan dan mainan yang aman bagi anak.
+      - generic [ref=e156]:
+        - heading "Kategori" [level=3] [ref=e157]
+        - list [ref=e158]:
+          - listitem [ref=e159]:
+            - link "Film" [ref=e160] [cursor=pointer]:
+              - /url: /films
+          - listitem [ref=e161]:
+            - link "Serial" [ref=e162] [cursor=pointer]:
+              - /url: /series
+          - listitem [ref=e163]:
+            - link "E-Books" [ref=e164] [cursor=pointer]:
+              - /url: /e-books
+          - listitem [ref=e165]:
+            - link "Game" [ref=e166] [cursor=pointer]:
+              - /url: /game
+          - listitem [ref=e167]:
+            - link "Aplikasi" [ref=e168] [cursor=pointer]:
+              - /url: /aplikasi
+      - generic [ref=e169]:
+        - heading "Lainnya" [level=3] [ref=e170]
+        - list [ref=e171]:
+          - listitem [ref=e172]:
+            - link "Artikel & Tips" [ref=e173] [cursor=pointer]:
+              - /url: /blog
+          - listitem [ref=e174]:
+            - link "Tentang Kami" [ref=e175] [cursor=pointer]:
+              - /url: /tentang-kami
+          - listitem [ref=e176]:
+            - link "Kontak" [ref=e177] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=e178]:
+            - link "Ajukan Judul" [ref=e179] [cursor=pointer]:
+              - /url: /ajukan-judul-baru
+          - listitem [ref=e180]:
+            - link "Ketentuan Layanan" [ref=e181] [cursor=pointer]:
+              - /url: /ketentuan-layanan-screenscore
+          - listitem [ref=e182]:
+            - link "Privasi" [ref=e183] [cursor=pointer]:
+              - /url: /privacy-policy
+    - generic [ref=e184]: © 2026 ScreenScore — WordPress headless + Next.js

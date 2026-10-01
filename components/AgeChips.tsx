@@ -32,7 +32,7 @@ export function AgeChips({
             key={t.slug}
             href={href}
             className={cx(
-              "rounded-full px-4 py-2 text-xs font-bold text-ink transition",
+              "inline-flex min-h-11 items-center rounded-full px-4 text-xs font-bold text-ink transition",
               isActive ? "bg-pink text-white" : CHIP_STYLES[i % CHIP_STYLES.length],
             )}
           >

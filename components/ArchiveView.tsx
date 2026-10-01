@@ -51,7 +51,7 @@ export async function ArchiveView({
           {age && (
             <a
               href={category.path}
-              className="mt-3 inline-block text-sm font-bold text-pink hover:underline"
+              className="mt-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink hover:underline"
             >
               Lihat semua {category.name} →
             </a>

@@ -19,32 +19,47 @@ export function SiteFooter() {
           <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink">
             Kategori
           </h3>
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-1 text-sm">
             {CATEGORY_LIST.map((c) => (
               <li key={c.slug}>
-                <Link href={c.path} className="hover:text-pink">
+                <Link href={c.path} className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">
                   {c.name}
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/gadget" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">
+                Gadget
+              </Link>
+            </li>
+            <li>
+              <Link href="/idol" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">
+                Idola
+              </Link>
+            </li>
+            <li>
+              <Link href="/pro-player" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">
+                Pro Player
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
           <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink">
             Lainnya
           </h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/blog" className="hover:text-pink">Artikel & Tips</Link></li>
-            <li><Link href="/tentang-kami" className="hover:text-pink">Tentang Kami</Link></li>
-            <li><Link href="/contact" className="hover:text-pink">Kontak</Link></li>
-            <li><Link href="/ajukan-judul-baru" className="hover:text-pink">Ajukan Judul</Link></li>
-            <li><Link href="/ketentuan-layanan-screenscore" className="hover:text-pink">Ketentuan Layanan</Link></li>
-            <li><Link href="/privacy-policy" className="hover:text-pink">Privasi</Link></li>
+          <ul className="space-y-1 text-sm">
+            <li><Link href="/blog" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Artikel & Tips</Link></li>
+            <li><Link href="/tentang-kami" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Tentang Kami</Link></li>
+            <li><Link href="/contact" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Kontak</Link></li>
+            <li><Link href="/ajukan-judul-baru" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Ajukan Judul</Link></li>
+            <li><Link href="/ketentuan-layanan-screenscore" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Ketentuan Layanan</Link></li>
+            <li><Link href="/privacy-policy" className="inline-flex min-h-11 items-center rounded-md pr-2 hover:text-pink">Privasi</Link></li>
           </ul>
         </div>
       </div>
       <div className="border-t border-line py-5 text-center text-xs">
-        © {new Date().getFullYear()} ScreenScore — WordPress headless + Next.js
+        © {new Date().getFullYear()} {SITE.name} — {SITE.tagline}
       </div>
     </footer>
   );

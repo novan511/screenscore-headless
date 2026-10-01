@@ -256,22 +256,38 @@ export function Hero({
               <Chevron dir="left" />
             </button>
 
-            <div className="flex items-center gap-2" role="tablist" aria-label="Daftar pilihan editor">
+            {/*
+              A plain button group, not role="tablist": tabs require a
+              `tabpanel` to control, and these slides are not panels — screen
+              readers announce the current slide via aria-current instead.
+            */}
+            <div
+              className="flex items-center gap-1"
+              role="group"
+              aria-label="Pilih pilihan editor"
+            >
               {items.map((it, i) => (
                 <button
                   key={it.id}
                   type="button"
-                  role="tab"
-                  aria-selected={i === index}
+                  aria-current={i === index}
                   aria-label={`Tampilkan ${it.name}`}
                   onClick={() => setIndex(i)}
-                  className={cx(
-                    "h-3 rounded-full transition-all",
-                    i === index
-                      ? "w-7 bg-pink"
-                      : "w-3 bg-pink/25 hover:bg-pink/50",
-                  )}
-                />
+                  /* A 12px dot is untappable on a phone. The padding keeps the
+                     same 44px touch target while the inner dot stays the
+                     original size, so the visual rail is unchanged. */
+                  className="group grid h-11 w-6 place-items-center"
+                >
+                  <span
+                    aria-hidden
+                    className={cx(
+                      "block h-3 rounded-full transition-all",
+                      i === index
+                        ? "w-7 bg-pink"
+                        : "w-3 bg-pink/25 group-hover:bg-pink/50",
+                    )}
+                  />
+                </button>
               ))}
             </div>
 

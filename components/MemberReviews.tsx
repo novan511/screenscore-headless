@@ -5,8 +5,14 @@ import { fetchMemberReviews } from "@/lib/reviews";
  * the related rail, reading rf/v1 (our reviewflow REST snippet). Until the
  * snippet is installed the endpoint 404s and the empty state shows.
  */
-export async function MemberReviews({ postId }: { postId: number }) {
-  const reviews = await fetchMemberReviews(postId);
+export async function MemberReviews({
+  postId,
+  permalink,
+}: {
+  postId: number;
+  permalink?: string;
+}) {
+  const reviews = await fetchMemberReviews(postId, permalink);
 
   if (!reviews || reviews.length === 0) {
     return (
@@ -111,11 +117,36 @@ export function ReviewsSkeleton() {
 
 function formatDate(value: string): string {
   if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("id-ID", {
+  // WordPress renders "Juli 6, 2026" — V8 only parses English months, so map
+  // Indonesian names first; anything unparseable falls back to the raw text.
+  const parsed = parseIdDate(value) ?? new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+}
+
+const ID_MONTHS: Record<string, number> = {
+  januari: 0,
+  februari: 1,
+  maret: 2,
+  april: 3,
+  mei: 4,
+  juni: 5,
+  juli: 6,
+  agustus: 7,
+  september: 8,
+  oktober: 9,
+  november: 10,
+  desember: 11,
+};
+
+function parseIdDate(value: string): Date | null {
+  const m = value.match(/([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
+  if (!m) return null;
+  const month = ID_MONTHS[m[1].toLowerCase()];
+  if (month === undefined) return null;
+  return new Date(Number(m[3]), month, Number(m[2]));
 }

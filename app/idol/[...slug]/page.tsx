@@ -11,31 +11,39 @@ export const dynamicParams = true;
  * `prerender-manifest.dynamicRoutes` — without it every hit renders with
  * `Cache-Control: no-store` and ISR never kicks in.
  */
-export function generateStaticParams(): { slug: string }[] {
+export function generateStaticParams(): { slug: string[] }[] {
   return [];
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return personMetadata("cast", slug, personCanonical("cast", slug));
+  if (!slug.length) notFound();
+  const path = slug.join("/");
+  return personMetadata("idol", path, personCanonical("idol", path));
 }
 
-export default async function CastDetailPage({
+/**
+ * Hierarchical idol URLs: groups (/idol/bts) and members
+ * (/idol/bts/jung-kook) share one catch-all, like character.
+ */
+export default async function IdolDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }) {
   const { slug } = await params;
-  const view = await PersonDetail({ kind: "cast", path: slug });
+  if (!slug.length) notFound();
+  const path = slug.join("/");
+  const view = await PersonDetail({ kind: "idol", path });
   if (!view) notFound();
   return (
     <>
       {view}
-      <RelatedPeopleBlock kind="cast" path={slug} />
+      <RelatedPeopleBlock kind="idol" path={path} />
     </>
   );
 }

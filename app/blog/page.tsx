@@ -162,7 +162,7 @@ export default async function BlogPage({ searchParams }: Props) {
             📭
           </p>
           <p className="mt-3 font-bold text-ink">Belum ada artikel di kategori ini.</p>
-          <Link href="/blog" className="mt-2 inline-block text-sm font-bold text-pink hover:underline">
+          <Link href="/blog" className="mt-2 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink hover:underline">
             Lihat semua artikel →
           </Link>
         </div>

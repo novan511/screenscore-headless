@@ -76,13 +76,13 @@ export const CATEGORIES: Record<string, CategoryConfig> = {
     slug: "game",
     name: "Game",
     path: "/game",
-    blurb: "Game & aplikasi bermain dengan nilai positif.",
+    blurb: "Game dengan nilai positif, aman dimainkan anak.",
   },
   aplikasi: {
     slug: "aplikasi",
     name: "Aplikasi",
     path: "/aplikasi",
-    blurb: "Aplikasi edukatif yang teruji untuk si kecil.",
+    blurb: "Aplikasi edukatif yang sudah diuji untuk si kecil.",
   },
 };
 

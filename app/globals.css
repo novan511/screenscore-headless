@@ -44,7 +44,15 @@ html {
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
-  font-family: var(--font-sans);
+  /*
+   * Reference `--font-jakarta` directly, not `--font-sans`. Tailwind only
+   * emits a `@theme` custom property into the stylesheet when a utility
+   * consumes it, so `--font-sans` never existed at runtime and `var()`
+   * against it silently fell back to the UA system stack — the site rendered
+   * in -apple-system despite downloading Plus Jakarta Sans.
+   */
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -56,6 +64,13 @@ body {
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   padding-bottom: 0.25rem;
+  /*
+   * A flex container will not shrink below its items' intrinsic width, so a
+   * `rail` inside a padded column could push the page wider than the
+   * viewport. This keeps the scroller itself bounded and lets the cards
+   * overflow *inside* it, which is the intended behaviour.
+   */
+  max-width: 100%;
 }
 .rail::-webkit-scrollbar {
   display: none;
@@ -81,6 +96,19 @@ body {
 :where(a, button, input, summary):focus-visible {
   outline: 2px solid var(--color-pink);
   outline-offset: 2px;
+}
+
+/*
+ * A 2px pink ring disappears against the pink CTA buttons and the yellow
+ * score chips, which is exactly where keyboard focus matters most. Add a
+ * light outer halo so the indicator survives on any background.
+ */
+:where(a, button, input, summary):focus-visible {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--color-pink);
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ============================================================

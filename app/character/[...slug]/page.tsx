@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PersonDetail } from "@/components/PersonDetail";
+import { PersonDetail, RelatedPeopleBlock } from "@/components/PersonDetail";
 import { personCanonical, personMetadata } from "@/lib/person";
 
 export const revalidate = 3600;
@@ -34,7 +34,13 @@ export default async function CharacterDetailPage({
 }) {
   const { slug } = await params;
   if (!slug.length) notFound();
-  const view = await PersonDetail({ kind: "character", path: slug.join("/") });
+  const path = slug.join("/");
+  const view = await PersonDetail({ kind: "character", path });
   if (!view) notFound();
-  return view;
+  return (
+    <>
+      {view}
+      <RelatedPeopleBlock kind="character" path={path} />
+    </>
+  );
 }

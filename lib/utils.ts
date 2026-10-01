@@ -195,3 +195,60 @@ export function pageWindow(page: number, totalPages: number, span = 2): number[]
   for (let i = start; i <= end; i++) out.push(i);
   return out;
 }
+
+/**
+ * Turn a scraped Yoast description into a usable meta description.
+ *
+ * Yoast often auto-generates these by concatenating the page's own opening
+ * blocks, so `/tentang-kami` shipped "Tentang Kami Tentang Screen Score Screen
+ * time menjadi…" — the H1 twice in a row. Search engines truncate that into a
+ * meaningless snippet, so drop a leading repeat of the title and clamp to the
+ * ~155 characters a SERP actually shows.
+ */
+export function metaDescription(
+  raw: string | undefined,
+  title: string,
+  max = 155,
+): string | undefined {
+  if (!raw) return undefined;
+
+  let text = raw.replace(/\s+/g, " ").trim();
+  if (!text) return undefined;
+
+  // Tolerate Yoast separating the repeated title with a pipe or dash.
+  const titleRe = new RegExp(
+    `^${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*[|\\-–—:]?\\s*`,
+    "i",
+  );
+  if (titleRe.test(text)) {
+    text = text.replace(titleRe, "").trim();
+  }
+
+  /*
+   * Yoast builds descriptions out of the post's first blocks, so a lead
+   * paragraph that is really a section heading ("Sinopsis Lengkap",
+   * "Review Lengkap") becomes the opening words of the meta description.
+   * Drop that label so the snippet starts on the actual sentence.
+   */
+  text = text.replace(
+    /^(?:sinopsis(?:\s+lengkap)?|review(?:\s+lengkap)?|ulasan(?:\s+lengkap)?|ringkasan|deskripsi|tentang)\s*[:\-–—]?\s*/i,
+    "",
+  );
+
+  /*
+   * "Tentang" is often followed by the brand itself, so stripping just the
+   * label leaves "Tentang Screen Score Screen time…" — the site name twice in
+   * a row before the real sentence starts. Drop the brand mention too.
+   */
+  text = text.replace(
+    /^(?:screen\s?score|screenscore)\s*[:\-–—]?\s*/i,
+    "",
+  );
+
+  if (!text) return undefined;
+
+  // Capitalise the first letter left behind by the strip above.
+  text = text.charAt(0).toUpperCase() + text.slice(1);
+  return clamp(text, max);
+}
+

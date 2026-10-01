@@ -26,13 +26,13 @@ export function Pagination({
   const window = pageWindow(page, totalPages);
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-1.5" aria-label="Paginasi">
+    <nav className="mt-10 flex flex-wrap items-center justify-center gap-1.5" aria-label="Paginasi">
       {page > 1 && (
         <Link
           href={hrefFor(page - 1)}
-          className="rounded-lg border border-line px-3 py-2 text-sm font-bold hover:border-ink"
+          className="inline-flex min-h-11 items-center rounded-lg border border-line px-3.5 text-sm font-bold hover:border-ink"
         >
-          ← Prev
+          ← Sebelumnya
         </Link>
       )}
       {page > 2 && <span className="px-1 text-muted">…</span>}
@@ -43,8 +43,8 @@ export function Pagination({
           aria-current={p === page ? "page" : undefined}
           className={
             p === page
-              ? "rounded-lg bg-ink px-3.5 py-2 text-sm font-bold text-white"
-              : "rounded-lg border border-line px-3 py-2 text-sm font-bold hover:border-ink"
+              ? "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-ink px-3.5 text-sm font-bold text-white"
+              : "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line px-3.5 text-sm font-bold hover:border-ink"
           }
         >
           {p}
@@ -54,9 +54,9 @@ export function Pagination({
       {page < totalPages && (
         <Link
           href={hrefFor(page + 1)}
-          className="rounded-lg border border-line px-3 py-2 text-sm font-bold hover:border-ink"
+          className="inline-flex min-h-11 items-center rounded-lg border border-line px-3.5 text-sm font-bold hover:border-ink"
         >
-          Next →
+          Berikutnya →
         </Link>
       )}
     </nav>

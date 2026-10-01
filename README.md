@@ -127,13 +127,15 @@ components/        Hero, Rail, PosterCard, ScorePanel, AgeChips, Pagination…
 
 ## Yang belum (roadmap)
 
-- **Review member**: tulis-review sudah jalan lewat `/api/reviews` (proxy ke
-  `reviewflow_submit`; gate & nonce diambil dari halaman WP dengan Cookie
-  member — penuh hanya setelah frontend mengambil alih domain). Daftar review
-  approved membaca `GET /wp-json/rf/v1/reviews?post_id=` — **snippet PHP-nya
-  belum dipasang di plugin** (butuh source plugin untuk schema penyimpanan).
-  Jalur member belum bisa diuji di localhost (cookie WP tidak ada) — uji di
-  domain asli.
+- **Review member**: daftar review approved **sudah tampil** — dibaca dari
+  `.rf-list-reviews` di halaman render WP (`parseMemberReviews` di
+  `lib/reviews.ts`, berbagi satu download HTML dengan bridge SEO/skor/trailer;
+  duplikat list+grid di-dedupe via `data-review-id`). Endpoint `rf/v1` tetap
+  dicoba dulu bila suatu saat dipasang. Tulis-review sudah jalan lewat
+  `/api/reviews` (proxy ke `reviewflow_submit`; gate & nonce diambil dari
+  halaman WP dengan Cookie member — penuh hanya setelah frontend mengambil
+  alih domain). Jalur member belum bisa diuji di localhost (cookie WP tidak
+  ada) — uji di domain asli.
 - Filmografi cast (tabel relasi `cast` di product masih kosong di WP)
 - Endpoint REST resmi untuk reviewflow (ganti HTML bridge)
 - Meilisearch untuk pencarian instan

@@ -15,9 +15,9 @@ import {
   fetchTitleSeo,
   fetchTrailer,
 } from "@/lib/bridge";
-import { CATEGORIES, SITE, WP_SITE, productPermalink, siteUrl } from "@/lib/config";
+import { CATEGORIES, SITE, WP_SITE, AGE_TAGS, productPermalink, siteUrl } from "@/lib/config";
 import { fetchRelated, fetchTitleBySlug } from "@/lib/store";
-import { stripTags } from "@/lib/utils";
+import { stripTags, clamp, metaDescription } from "@/lib/utils";
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -46,8 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const path = `/content/${slug}`;
   const name = seo?.title || title?.name || slug;
-  // Yoast ships an empty description for most products — fall back to the hook line.
-  const description = seo?.description || title?.excerpt || undefined;
+  // Yoast ships an empty description for most products, and for the rest it
+  // tends to repeat the title or open with a raw WP block label ("Sinopsis
+  // Lengkap  Mayor Tom Loftis…"). Clean the label, clamp to a SERP-sized
+  // snippet, and fall back to the excerpt.
+  const description =
+    metaDescription(seo?.description, name) ||
+    (title?.excerpt ? clamp(title.excerpt, 155) : undefined);
   const image = seo?.image || title?.images[0]?.src;
 
   return {
@@ -91,6 +96,20 @@ export default async function TitlePage({ params }: Props) {
   const category = title.categories[0];
   const poster = title.images[0];
   const categoryPath = category ? CATEGORIES[category.slug]?.path ?? "/films" : null;
+
+  /*
+   * Common Sense Media-style cross-link: when the product carries a "Kelompok
+   * Umur" tag, the age chip becomes a door to the same archive pre-filtered
+   * for that age band — parents deciding "is this for my kid?" get one tap to
+   * "show me more like this for this age". Pure server-rendered link, no JS.
+   */
+  const ageTag = title.tags.find((t) =>
+    AGE_TAGS.some((a) => a.slug === t.slug),
+  );
+  const ageHref =
+    ageTag && categoryPath
+      ? `${categoryPath}?age=${encodeURIComponent(ageTag.slug)}`
+      : null;
 
   const showTrailer = !!(
     trailer &&
@@ -233,11 +252,20 @@ export default async function TitlePage({ params }: Props) {
                     {title.year}
                   </span>
                 )}
-                {title.ageRating && (
-                  <span className="tabular rounded bg-yellow px-2.5 py-1 text-ink">
-                    {title.ageRating}
-                  </span>
-                )}
+                {title.ageRating &&
+                  (ageHref ? (
+                    <Link
+                      href={ageHref}
+                      title={`Lihat ${category?.name ?? "judul"} lain untuk usia ini`}
+                      className="tabular rounded bg-yellow px-2.5 py-1 text-ink transition hover:bg-yellow-600 hover:underline"
+                    >
+                      {title.ageRating}
+                    </Link>
+                  ) : (
+                    <span className="tabular rounded bg-yellow px-2.5 py-1 text-ink">
+                      {title.ageRating}
+                    </span>
+                  ))}
               </div>
 
               <h1 className="mt-3.5 text-3xl font-extrabold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl">
@@ -415,7 +443,7 @@ export default async function TitlePage({ params }: Props) {
                 returnPath={siteUrl(`/content/${slug}`)}
               />
               <Suspense fallback={<ReviewsSkeleton />}>
-                <MemberReviews postId={title.id} />
+                <MemberReviews postId={title.id} permalink={title.permalink} />
               </Suspense>
             </div>
           </div>

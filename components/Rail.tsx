@@ -26,7 +26,9 @@ export function Rail({
         </div>
         <Link
           href={href}
-          className="shrink-0 text-sm font-bold text-pink hover:underline"
+          /* Inline "see all" links sit in a row header — the vertical padding
+             brings the tap height to 44px without moving the layout. */
+          className="inline-flex min-h-11 shrink-0 items-center rounded-md px-1 text-sm font-bold text-pink hover:underline"
         >
           {moreLabel} →
         </Link>

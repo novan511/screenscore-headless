@@ -71,7 +71,9 @@ export function ScorePanel({
           {score.dimensions.map((d) => (
             <div key={d.label} className="flex items-center justify-between gap-4">
               <span className="text-sm font-semibold">{d.label}</span>
-              <span className="flex items-center gap-0.5 text-sm" aria-label={`${d.stars} dari 5`}>
+              {/* role="img": without it a plain span's aria-label is never
+                  exposed to assistive tech, so the rating would be silent. */}
+              <span role="img" aria-label={`${d.stars} dari 5`} className="flex items-center gap-0.5 text-sm">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span
                     key={i}

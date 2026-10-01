@@ -27,7 +27,7 @@ export default async function SearchPage({
   const { q = "" } = await searchParams;
   const query = q.trim();
 
-  const [titleRes, castRes, creatorRes] = await Promise.all([
+  const [titleRes, castRes, creatorRes, idolRes, proPlayerRes, gadgetRes] = await Promise.all([
     query
       ? fetchTitles({ search: query, perPage: 24, page: 1 }).catch(ignoreMissing(null))
       : Promise.resolve(null),
@@ -36,6 +36,15 @@ export default async function SearchPage({
       : Promise.resolve(null),
     query
       ? fetchPeople("creator", { search: query, first: 8 }).catch(ignoreMissing(null))
+      : Promise.resolve(null),
+    query
+      ? fetchPeople("idol", { search: query, first: 8 }).catch(ignoreMissing(null))
+      : Promise.resolve(null),
+    query
+      ? fetchPeople("pro-player", { search: query, first: 8 }).catch(ignoreMissing(null))
+      : Promise.resolve(null),
+    query
+      ? fetchPeople("gadget", { search: query, first: 8 }).catch(ignoreMissing(null))
       : Promise.resolve(null),
   ]);
 
@@ -53,6 +62,27 @@ export default async function SearchPage({
       uri: n.uri,
       image: n.featuredImage?.node?.sourceUrl,
       kind: "creator" as const,
+    })) ?? []),
+    ...(idolRes?.items.map((n) => ({
+      slug: n.slug,
+      title: n.title,
+      uri: n.uri,
+      image: n.featuredImage?.node?.sourceUrl,
+      kind: "idol" as const,
+    })) ?? []),
+    ...(proPlayerRes?.items.map((n) => ({
+      slug: n.slug,
+      title: n.title,
+      uri: n.uri,
+      image: n.featuredImage?.node?.sourceUrl,
+      kind: "pro-player" as const,
+    })) ?? []),
+    ...(gadgetRes?.items.map((n) => ({
+      slug: n.slug,
+      title: n.title,
+      uri: n.uri,
+      image: n.featuredImage?.node?.sourceUrl,
+      kind: "gadget" as const,
     })) ?? []),
   ];
 
@@ -88,7 +118,13 @@ export default async function SearchPage({
             {people.map((p) => (
               <Link
                 key={`${p.kind}-${p.slug}`}
-                href={`/${p.kind === "creator" ? "creator" : "cast"}/${p.slug}`}
+                /* Hierarchical entries (idol members) live under their group
+                   path — trust the WP `uri`, not kind + slug. */
+                href={
+                  p.uri
+                    ? `/${p.uri.replace(/^\/+|\/+$/g, "")}`
+                    : `/${p.kind}/${p.slug}`
+                }
                 className="group text-center"
               >
                 <div
@@ -110,7 +146,15 @@ export default async function SearchPage({
                   {p.title}
                 </p>
                 <p className="text-[11px] uppercase tracking-wide text-muted">
-                  {p.kind === "creator" ? "Kreator" : "Pemeran"}
+                  {p.kind === "creator"
+                    ? "Kreator"
+                    : p.kind === "idol"
+                      ? "Idola"
+                      : p.kind === "pro-player"
+                        ? "Pro Player"
+                        : p.kind === "gadget"
+                          ? "Gadget"
+                          : "Pemeran"}
                 </p>
               </Link>
             ))}

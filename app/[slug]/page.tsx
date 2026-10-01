@@ -4,7 +4,7 @@ import { fetchStaticPage } from "@/lib/graphql";
 import { ignoreMissing, isUpstreamError } from "@/lib/http";
 import { fetchPageSeo } from "@/lib/bridge";
 import { fetchPostDetail } from "@/lib/blog";
-import { sanitizeWpHtml } from "@/lib/utils";
+import { sanitizeWpHtml, metaDescription } from "@/lib/utils";
 import { SITE } from "@/lib/config";
 
 export const revalidate = 3600;
@@ -31,8 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ]);
 
   const plainTitle = page?.title || slug.replace(/-/g, " ");
-  const description = seo?.description || undefined;
   const path = `/${slug}`;
+  // Yoast descriptions for static pages usually begin with the page title
+  // itself; strip that repeat and clamp so the SERP snippet stays readable.
+  const description = metaDescription(seo?.description, plainTitle);
 
   return {
     // Yoast already appends the brand — don't stack the site template on top.

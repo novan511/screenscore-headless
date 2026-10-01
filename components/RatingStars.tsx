@@ -16,6 +16,7 @@ export function RatingStars({
   if (!value) return null;
   return (
     <span
+      role="img"
       className={cx("inline-flex items-center gap-1", text)}
       aria-label={`${value} dari 5`}
     >

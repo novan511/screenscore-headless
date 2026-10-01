@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { fetchPersonBio } from "@/lib/bridge";
-import { fetchPerson } from "@/lib/graphql";
+import { fetchPerson, fetchPeople } from "@/lib/graphql";
+import { ignoreMissing } from "@/lib/http";
 import { sanitizeWpHtml } from "@/lib/utils";
 import type { PersonKind } from "@/lib/types";
 
@@ -11,6 +13,8 @@ const KIND_LABEL: Record<PersonKind, string> = {
   character: "Karakter",
   song: "Lagu",
   idol: "Idola",
+  "pro-player": "Pro Player",
+  gadget: "Gadget",
 };
 
 const KIND_HOME: Record<PersonKind, string> = {
@@ -18,7 +22,9 @@ const KIND_HOME: Record<PersonKind, string> = {
   creator: "/cast",
   character: "/characters",
   song: "/song",
-  idol: "/cast",
+  idol: "/idol",
+  "pro-player": "/pro-player",
+  gadget: "/gadget",
 };
 
 /**
@@ -95,5 +101,103 @@ export async function PersonDetail({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Same-kind neighbour rail ("Idol Lainnya"), exported as a wrapper so pages
+ * can place the `<Suspense>` boundary in JSX. (A boundary created inside the
+ * awaited `PersonDetail()` call never streams — it prerenders as fallback
+ * into the ISR cache. At page level it resolves after first paint, exactly
+ * like the "Mirip dengan ini" rail on content pages.)
+ */
+export function RelatedPeopleBlock({
+  kind,
+  path,
+}: {
+  kind: PersonKind;
+  path: string;
+}) {
+  const excludeSlug = path.split("/").filter(Boolean).pop() ?? path;
+  return (
+    <div className="mx-auto max-w-[1280px] px-4 pb-10 sm:px-6">
+      <Suspense fallback={<RelatedSkeleton />}>
+        <RelatedPeople kind={kind} excludeSlug={excludeSlug} />
+      </Suspense>
+    </div>
+  );
+}
+
+/** Same-kind neighbours (BTS → other idols), excluding the current page. */
+async function RelatedPeople({
+  kind,
+  excludeSlug,
+}: {
+  kind: PersonKind;
+  excludeSlug: string;
+}) {
+  const data = await fetchPeople(kind, { first: 9 }).catch(ignoreMissing(null));
+  const items = (data?.items ?? [])
+    .filter((p) => p.slug !== excludeSlug)
+    .slice(0, 8);
+  if (items.length === 0) return null;
+
+  const base = KIND_HOME[kind];
+  return (
+    <section className="mt-12" aria-label={`${KIND_LABEL[kind]} lainnya`}>
+      <h2 className="mb-4 text-xl font-extrabold sm:text-2xl">
+        {KIND_LABEL[kind]} Lainnya
+      </h2>
+      <div className="rail ss-stagger">
+        {items.map((p) => (
+          <Link
+            key={p.databaseId}
+            /* Hierarchical entries (idol members, sub-characters) live under
+               their group path — the GraphQL `uri` is the source of truth,
+               not base + slug. */
+            href={
+              p.uri
+                ? `/${p.uri.replace(/^\/+|\/+$/g, "")}`
+                : `${base}/${p.slug}`
+            }
+            className="group w-28 shrink-0 text-center"
+          >
+            <div className="mx-auto h-24 w-24 overflow-hidden rounded-full bg-surface">
+              {p.featuredImage?.node?.sourceUrl && (
+                <Image
+                  src={p.featuredImage.node.sourceUrl}
+                  alt={p.title}
+                  width={96}
+                  height={96}
+                  sizes="96px"
+                  quality={70}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+            <p className="mt-2 line-clamp-2 text-xs font-bold group-hover:text-pink">
+              {p.title}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RelatedSkeleton() {
+  return (
+    <section className="mt-12" aria-busy="true" aria-label="Memuat konten terkait">
+      <div className="skeleton mb-4 h-7 w-48 rounded" />
+      <div className="flex gap-4 overflow-hidden">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="w-28 shrink-0 text-center">
+            <div className="skeleton mx-auto h-24 w-24 rounded-full" />
+            <div className="skeleton mx-auto mt-2 h-3.5 w-4/5 rounded" />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

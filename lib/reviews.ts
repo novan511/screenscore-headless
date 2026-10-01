@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { parse, type HTMLElement } from "node-html-parser";
 import { WP_SITE, productPermalink } from "./config";
-import { UpstreamError, wpFetch } from "./http";
+import { UpstreamError, loadWpHtml, wpFetch } from "./http";
 
 /**
  * Client for the reviewflow plugin's user-review flow:
@@ -171,26 +171,98 @@ export async function submitReview(
  * Approved member reviews via the rf/v1 REST route (our plugin snippet).
  * Returns null when the endpoint does not exist yet — the section then
  * shows its empty state instead of failing the page.
+ *
+ * When a permalink is supplied and rf/v1 yields nothing, falls back to the
+ * HTML bridge: reviewflow server-renders approved reviews into
+ * `.rf-list-reviews .rf-review-card[data-review-id]` on the product page
+ * itself, so no plugin change is needed to display them. The HTML download
+ * is shared (React-cached) with the SEO/score/trailer bridges.
  */
 export const fetchMemberReviews = cache(
-  async (postId: number): Promise<MemberReview[] | null> => {
+  async (postId: number, permalink?: string): Promise<MemberReview[] | null> => {
     try {
       const res = await wpFetch(
         `${WP_SITE}/wp-json/rf/v1/reviews?post_id=${postId}`,
       );
-      if (res.status === 404) return null;
-      if (!res.ok) throw new UpstreamError(`rf/v1 HTTP ${res.status}`);
-      const data = (await res.json()) as { reviews?: unknown[] };
-      if (!Array.isArray(data.reviews)) return null;
-      return data.reviews
-        .map(mapMemberReview)
-        .filter((r): r is MemberReview => r !== null);
+      if (res.status !== 404 && res.ok) {
+        const data = (await res.json()) as { reviews?: unknown[] };
+        if (Array.isArray(data.reviews)) {
+          return data.reviews
+            .map(mapMemberReview)
+            .filter((r): r is MemberReview => r !== null);
+        }
+      } else if (res.status !== 404 && !res.ok) {
+        throw new UpstreamError(`rf/v1 HTTP ${res.status}`);
+      }
+    } catch (err) {
+      if (err instanceof UpstreamError) throw err;
+    }
+
+    // No REST source — scrape the server-rendered review list instead.
+    if (!permalink) return null;
+    try {
+      const html = await loadWpHtml(permalink);
+      if (!html) return null;
+      return parseMemberReviews(html);
     } catch (err) {
       if (err instanceof UpstreamError) throw err;
       return null;
     }
   },
 );
+
+/**
+ * Parse approved member reviews out of a rendered WordPress product page.
+ *
+ * The editor card and member cards share the `.rf-review-card` class, but
+ * only member cards carry `data-review-id` — and each review appears twice
+ * (list + grid), so ids are de-duplicated. Verified against
+ * /content/mission-impossible-dead-reckoning-part-one/ (3 reviews).
+ */
+export function parseMemberReviews(html: string): MemberReview[] {
+  const root = parse(html);
+  const list = root.querySelector(".rf-list-reviews") ?? root;
+  const out: MemberReview[] = [];
+  const seen = new Set<number>();
+
+  for (const card of list.querySelectorAll(
+    ".rf-review-card[data-review-id]",
+  )) {
+    const id = Number(card.getAttribute("data-review-id"));
+    if (!Number.isFinite(id) || seen.has(id)) continue;
+    seen.add(id);
+
+    const text = (sel: string) =>
+      card.querySelector(sel)?.text?.trim() ?? "";
+    const num = (sel: string): number | null => {
+      const raw = text(sel).replace(",", ".");
+      const v = Number(raw);
+      return raw !== "" && Number.isFinite(v) ? v : null;
+    };
+
+    const dimensions: { label: string; stars: number }[] = [];
+    for (const row of card.querySelectorAll(".rf-detail-row")) {
+      const label = row.querySelector(".rf-detail-label")?.text?.trim() ?? "";
+      const stars = row.querySelectorAll(".rf-star.filled").length;
+      if (label) dimensions.push({ label, stars });
+    }
+
+    const helpfulText = text(".rf-card-helpful");
+    const helpful = Number(helpfulText.replace(/[^0-9]/g, ""));
+    out.push({
+      id,
+      author: text(".rf-card-author") || "Member ScreenScore",
+      rating: num(".rf-card-avg"),
+      title: text(".rf-card-title"),
+      content: text(".rf-card-content"),
+      date: text(".rf-card-date"),
+      helpfulCount: Number.isFinite(helpful) ? helpful : 0,
+      dimensions,
+    });
+  }
+
+  return out;
+}
 
 /* ---------------- internals ---------------- */
 
