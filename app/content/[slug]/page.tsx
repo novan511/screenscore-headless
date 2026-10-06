@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Rail } from "@/components/Rail";
+import { AdSlot } from "@/components/AdSlot";
 import { ScorePanel } from "@/components/ScorePanel";
 import { TrailerPlayer } from "@/components/TrailerPlayer";
 import { ReviewWriter } from "@/components/ReviewWriter";
@@ -15,9 +15,19 @@ import {
   fetchTitleSeo,
   fetchTrailer,
 } from "@/lib/bridge";
-import { CATEGORIES, SITE, WP_SITE, AGE_TAGS, productPermalink, siteUrl } from "@/lib/config";
+import {
+  ADSENSE,
+  CATEGORIES,
+  SITE,
+  SITE_AUTHOR,
+  WP_SITE,
+  AGE_TAGS,
+  productPermalink,
+  siteUrl,
+} from "@/lib/config";
 import { fetchRelated, fetchTitleBySlug } from "@/lib/store";
 import { stripTags, clamp, metaDescription } from "@/lib/utils";
+import type { Title } from "@/lib/types";
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -184,46 +194,43 @@ export default async function TitlePage({ params }: Props) {
     <>
       <JsonLd data={structuredData} />
 
-      {/* ================= hero — cinematic ink band ================= */}
-      <section className="relative overflow-hidden bg-ink text-white">
-        <div className="absolute inset-0">
-          {poster && (
-            <Image
-              src={poster.src}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              quality={55}
-              className="scale-110 object-cover opacity-45 blur-2xl"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/92 to-ink/55" />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink to-transparent" />
-        </div>
+      {/* ============ head — the legacy page opens with the H1, then the
+           breadcrumb, then the top ad slot, then the media row ============ */}
+      <div className="bg-surface">
+        <div className="mx-auto max-w-[1200px] px-4 pb-16 pt-8 sm:px-6 sm:pt-10">
+          <h1 className="text-[2rem] font-bold leading-[1.1] tracking-tight text-ink sm:text-[2.6rem]">
+            {title.name}
+          </h1>
 
-        <div className="relative mx-auto max-w-[1280px] px-4 pb-16 pt-5 sm:px-6 sm:pb-24">
-          {/* breadcrumb */}
-          <nav className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-white/45">
-            <Link href="/" className="transition hover:text-yellow">
+          <nav className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted">
+            <Link href="/" className="transition hover:text-pink">
               Beranda
             </Link>
             <span aria-hidden>/</span>
             {category && categoryPath && (
               <>
-                <Link href={categoryPath} className="transition hover:text-yellow">
+                <Link href={categoryPath} className="transition hover:text-pink">
                   {category.name}
                 </Link>
                 <span aria-hidden>/</span>
               </>
             )}
-            <span className="text-white/85">{title.name}</span>
+            <span className="font-medium text-ink">{title.name}</span>
           </nav>
 
-          <div className="mt-6 flex flex-col gap-7 sm:flex-row sm:gap-9">
-            {/* poster */}
+          {/* Screenscore_top_product */}
+          <AdSlot
+            slot={ADSENSE.slots.topProduct}
+            label="Screenscore_top_product"
+            className="mt-6"
+          />
+
+          <div className="mt-7 flex flex-col gap-7 sm:flex-row sm:gap-9">
+            {/* poster — the legacy gallery frame: plain white card, no halo.
+                Full-bleed on phones (the column is only ~360px wide there),
+                then the fixed 46/56 thumb widths from sm up. */}
             <div
-              className="relative mx-auto w-40 shrink-0 overflow-hidden rounded-2xl bg-white/10 shadow-[0_28px_70px_-24px_rgb(0_0_0/0.7)] ring-1 ring-white/20 sm:mx-0 sm:w-48 lg:w-56"
+              className="relative w-full shrink-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-line sm:w-48 lg:w-56"
               style={{ aspectRatio: "2 / 3" }}
             >
               {poster && (
@@ -239,7 +246,7 @@ export default async function TitlePage({ params }: Props) {
               )}
             </div>
 
-            {/* title block */}
+            {/* summary block — chips, short description, score, tags */}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap gap-2 text-[11px] font-extrabold uppercase tracking-wide">
                 {category && (
@@ -248,7 +255,7 @@ export default async function TitlePage({ params }: Props) {
                   </span>
                 )}
                 {title.year && (
-                  <span className="rounded bg-white/15 px-2.5 py-1 text-white backdrop-blur-sm">
+                  <span className="rounded border border-line bg-white px-2.5 py-1 text-muted">
                     {title.year}
                   </span>
                 )}
@@ -268,12 +275,8 @@ export default async function TitlePage({ params }: Props) {
                   ))}
               </div>
 
-              <h1 className="mt-3.5 text-3xl font-extrabold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl">
-                {title.name}
-              </h1>
-
               {title.excerpt && (
-                <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-white/75 sm:text-base">
+                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
                   {title.excerpt}
                 </p>
               )}
@@ -293,7 +296,7 @@ export default async function TitlePage({ params }: Props) {
                   </span>
                 )}
                 {title.reviewCount > 0 && (
-                  <span className="tabular text-sm font-semibold text-white/75">
+                  <span className="tabular text-sm font-semibold text-muted">
                     ★ {title.averageRating.toFixed(1)} · {title.reviewCount} review
                     orang tua
                   </span>
@@ -305,7 +308,7 @@ export default async function TitlePage({ params }: Props) {
                   {title.tags.slice(0, 5).map((t) => (
                     <span
                       key={t.id}
-                      className="rounded-full border border-white/20 px-2.5 py-0.5 text-xs font-semibold text-white/70"
+                      className="rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-semibold text-muted"
                     >
                       {t.name}
                     </span>
@@ -319,7 +322,7 @@ export default async function TitlePage({ params }: Props) {
                   {showTrailer && (
                     <a
                       href="#trailer"
-                      className="press inline-flex items-center gap-2 rounded-full bg-yellow px-5 py-2.5 text-sm font-extrabold text-ink hover:bg-yellow-600"
+                      className="press inline-flex items-center gap-2 rounded bg-yellow px-5 py-2.5 text-sm font-bold text-ink hover:bg-yellow-600"
                     >
                       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden>
                         <path fill="currentColor" d="M8 5.5v13l11-6.5z" />
@@ -330,7 +333,7 @@ export default async function TitlePage({ params }: Props) {
                   {article.html && (
                     <a
                       href="#ulasan"
-                      className="press inline-flex items-center rounded-full border border-white/25 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/10"
+                      className="press inline-flex items-center rounded border border-line bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:border-ink"
                     >
                       Baca Review
                     </a>
@@ -339,17 +342,14 @@ export default async function TitlePage({ params }: Props) {
               )}
             </div>
           </div>
-        </div>
-      </section>
 
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
-        {/* signature score box — overlaps the hero so the yellow hinge
-            bridges the dark band and the reading surface below */}
-        {showScore && (
-          <div className="relative z-10 -mt-10 sm:-mt-14">
-            <ScorePanel score={score} title={title} />
-          </div>
-        )}
+          {/* signature score box — sits on the page field instead of
+              straddling a dark hero band */}
+          {showScore && (
+            <div className="mt-8">
+              <ScorePanel score={score} title={title} />
+            </div>
+          )}
 
         {/* ================= trailer ================= */}
         {showTrailer && trailer && (
@@ -368,17 +368,27 @@ export default async function TitlePage({ params }: Props) {
           </section>
         )}
 
+        {/* ================= review gate — the legacy page prints the
+            "login atau daftar" box above the article ================= */}
+        <section className="mt-10">
+          <div className="mx-auto max-w-[46rem]">
+            <ReviewWriter
+              slug={slug}
+              postId={title.id}
+              wpSite={WP_SITE}
+              returnPath={siteUrl(`/content/${slug}`)}
+            />
+          </div>
+        </section>
+
         {/* ================= article ================= */}
         {article.html && (
-          <section
-            id="ulasan"
-            className="mt-14 flex justify-center scroll-mt-24 sm:mt-16"
-          >
-            <div className="w-full max-w-[46rem]">
+          <section id="ulasan" className="mt-12 scroll-mt-24 sm:mt-14">
+            <div className="w-full max-w-[62rem]">
               {article.toc.length >= 3 ? (
                 <nav
                   aria-label="Daftar isi"
-                  className="mb-9 rounded-2xl border border-line bg-surface p-5 sm:p-6"
+                  className="mb-9 rounded-xl border border-line bg-white p-5 sm:p-6"
                 >
                   <p className="mb-3.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
                     Daftar Isi
@@ -404,7 +414,7 @@ export default async function TitlePage({ params }: Props) {
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
                     Ulasan
                   </p>
-                  <h2 className="mt-1.5 text-2xl font-extrabold sm:text-3xl">
+                  <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">
                     Review Lengkap &amp; Sinopsis
                   </h2>
                 </header>
@@ -418,15 +428,36 @@ export default async function TitlePage({ params }: Props) {
           </section>
         )}
 
+        {/* ================= about writer ================= */}
+        <section className="mt-14 max-w-[62rem]">
+          <h2 className="text-[1.6rem] font-bold tracking-tight text-ink">
+            About Writer
+          </h2>
+          <div className="mt-4 flex gap-4 rounded-xl bg-[#f7f5f2] p-5 sm:gap-5 sm:p-6">
+            <span
+              aria-hidden
+              className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-yellow text-lg font-bold text-ink"
+            >
+              {SITE_AUTHOR.name.slice(0, 1).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <p className="text-base font-bold text-ink">{SITE_AUTHOR.name}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                {SITE_AUTHOR.bio}
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ================= member reviews ================= */}
         <section id="review-member" className="mt-14 scroll-mt-24 sm:mt-16">
-          <div className="mx-auto max-w-[46rem]">
+          <div className="max-w-[62rem]">
             <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
               <div>
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
                   Komunitas
                 </p>
-                <h2 className="mt-1.5 text-xl font-extrabold sm:text-2xl">
+                <h2 className="mt-1.5 text-xl font-bold sm:text-2xl">
                   Review Member
                 </h2>
               </div>
@@ -436,12 +467,6 @@ export default async function TitlePage({ params }: Props) {
             </header>
 
             <div className="mt-5">
-              <ReviewWriter
-                slug={slug}
-                postId={title.id}
-                wpSite={WP_SITE}
-                returnPath={siteUrl(`/content/${slug}`)}
-              />
               <Suspense fallback={<ReviewsSkeleton />}>
                 <MemberReviews postId={title.id} permalink={title.permalink} />
               </Suspense>
@@ -449,61 +474,110 @@ export default async function TitlePage({ params }: Props) {
           </div>
         </section>
 
-        {/* Related titles cost a second Store API round trip (~2.8s cold), so
-            they stream in behind the article instead of holding up first paint. */}
+        {/* Konten Lainnya — related titles cost a second Store API round trip
+            (~2.8s cold), so they stream in behind the article. */}
         {category && (
-          <Suspense fallback={<RelatedRailSkeleton />}>
-            <RelatedRail
+          <Suspense fallback={<RelatedGridSkeleton />}>
+            <RelatedGrid
               categorySlug={category.slug}
               excludeSlug={title.slug}
               tagSlugs={title.tags.map((t) => t.slug)}
-              label={category.name}
             />
           </Suspense>
         )}
+        </div>
       </div>
     </>
   );
 }
 
-async function RelatedRail({
+/**
+ * "Konten Lainnya" — the legacy page closes with a four-up card grid of
+ * sibling titles. Card anatomy mirrors the Elementor post card: image on
+ * top, title, then a small caps READ MORE.
+ */
+async function RelatedGrid({
   categorySlug,
   excludeSlug,
   tagSlugs,
-  label,
 }: {
   categorySlug: string;
   excludeSlug: string;
   tagSlugs: string[];
-  label: string;
 }) {
   const related = await fetchRelated(
     categorySlug,
     excludeSlug,
-    10,
+    8,
     tagSlugs,
   ).catch(() => []);
   if (!related.length) return null;
+
   return (
-    <Rail
-      heading="Mirip dengan ini"
-      blurb={`Lebih banyak ${label} pilihan`}
-      href={CATEGORIES[categorySlug]?.path ?? "/films"}
-      items={related}
-    />
+    <section className="mt-14">
+      <h2 className="text-[1.9rem] font-bold tracking-tight text-ink sm:text-[2.1rem]">
+        Konten Lainnya
+      </h2>
+      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-[35px] lg:grid-cols-4">
+        {related.slice(0, 4).map((t) => (
+          <RelatedCard key={t.id} title={t} />
+        ))}
+      </div>
+    </section>
   );
 }
 
-/** Matches a Rail's footprint so the streamed-in cards do not shift the page. */
-function RelatedRailSkeleton() {
+function RelatedCard({ title }: { title: Title }) {
+  const poster = title.images[0];
   return (
-    <section className="mt-12" aria-busy="true">
-      <div className="mb-4 h-7 w-52 rounded skeleton" />
-      <div className="flex gap-4 overflow-hidden">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="w-[156px] shrink-0">
-            <div className="skeleton aspect-[2/3] w-full rounded-lg" />
-            <div className="skeleton mt-2.5 h-4 w-4/5 rounded" />
+    <Link
+      href={`/content/${title.slug}`}
+      className="press group flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-md"
+    >
+      <div
+        className="relative w-full overflow-hidden bg-surface"
+        style={{ aspectRatio: "4 / 5" }}
+      >
+        {poster ? (
+          <Image
+            src={poster.src}
+            alt={poster.alt || title.name}
+            fill
+            sizes="(min-width: 1024px) 25vw, 50vw"
+            quality={70}
+            className="object-cover"
+          />
+        ) : (
+          <div className="grid h-full place-items-center p-3 text-center text-xs font-semibold text-muted">
+            {title.name}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="line-clamp-2 text-[15px] font-bold leading-snug text-ink group-hover:text-pink">
+          {title.name}
+        </p>
+        <span className="mt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-muted transition group-hover:text-pink">
+          Read More
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+/** Four white card shells — the same footprint as the streamed-in grid. */
+function RelatedGridSkeleton() {
+  return (
+    <section className="mt-14" aria-busy="true">
+      <div className="h-9 w-56 rounded skeleton" />
+      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-[35px] lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="overflow-hidden rounded-lg bg-white shadow-sm">
+            <div className="skeleton w-full" style={{ aspectRatio: "4 / 5" }} />
+            <div className="p-4">
+              <div className="skeleton h-4 w-4/5 rounded" />
+              <div className="skeleton mt-3 h-3 w-20 rounded" />
+            </div>
           </div>
         ))}
       </div>

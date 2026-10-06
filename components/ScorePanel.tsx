@@ -19,11 +19,11 @@ export function ScorePanel({
   if (!score && !community) return null;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-surface ss-reveal" ss-reveal="">
+    <section className="overflow-hidden rounded-xl border border-line bg-white ss-reveal" ss-reveal="">
       <div className="flex flex-col gap-6 p-5 sm:flex-row sm:p-6">
         {/* score box */}
         {score?.score != null && (
-          <div className="flex shrink-0 flex-col items-center rounded-xl bg-yellow px-6 py-5 sm:w-40">
+          <div className="flex shrink-0 flex-col items-center rounded-lg bg-yellow px-6 py-5 sm:w-40">
             <span className="text-4xl font-extrabold tabular text-ink">
               <ScoreNumber value={score.score} />
             </span>
@@ -67,7 +67,7 @@ export function ScorePanel({
 
       {/* 6-dimension breakdown */}
       {score && score.dimensions.length > 0 && (
-        <div className="grid gap-x-8 gap-y-3 border-t border-line bg-canvas p-5 sm:grid-cols-2 sm:p-6">
+        <div className="grid gap-x-8 gap-y-3 border-t border-line bg-surface p-5 sm:grid-cols-2 sm:p-6">
           {score.dimensions.map((d) => (
             <div key={d.label} className="flex items-center justify-between gap-4">
               <span className="text-sm font-semibold">{d.label}</span>

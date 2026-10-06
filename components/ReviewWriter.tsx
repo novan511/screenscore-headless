@@ -238,35 +238,23 @@ export function ReviewWriter({
 
   /* ---------------- guest gate (default) ---------------- */
   return (
-    <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
-      <div className="flex items-start gap-4">
-        <span
-          aria-hidden
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-yellow text-xl text-ink"
+    <div className="mx-auto max-w-[42rem] rounded-lg border border-dashed border-line bg-white px-6 py-7 text-center">
+      <p className="text-sm leading-relaxed text-muted">
+        Silahkan login atau daftar untuk memberikan review.
+      </p>
+      <div className="mt-4 flex flex-wrap justify-center gap-3">
+        <a
+          href={loginUrl}
+          className="press rounded bg-yellow px-5 py-1.5 text-sm font-bold text-ink hover:bg-yellow-600"
         >
-          ★
-        </span>
-        <div className="min-w-0">
-          <h3 className="text-lg font-extrabold">Ingin menulis review?</h3>
-          <p className="mt-1 text-sm leading-relaxed text-ink/75">
-            Login atau daftar untuk memberikan review. Review kamu tampil di
-            halaman ini setelah disetujui admin.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a
-              href={loginUrl}
-              className="press rounded-full bg-pink px-5 py-2.5 text-sm font-extrabold text-white hover:bg-pink-600"
-            >
-              Login
-            </a>
-            <a
-              href={registerUrl}
-              className="press rounded-full border border-line bg-canvas px-5 py-2.5 text-sm font-bold text-ink hover:border-ink"
-            >
-              Daftar
-            </a>
-          </div>
-        </div>
+          Login
+        </a>
+        <a
+          href={registerUrl}
+          className="press rounded border border-pink bg-white px-5 py-1.5 text-sm font-bold text-pink hover:bg-blush"
+        >
+          Daftar
+        </a>
       </div>
     </div>
   );

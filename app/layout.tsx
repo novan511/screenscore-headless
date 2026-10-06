@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
+import { Jost } from "next/font/google";
 import "./globals.css";
 import { PageTransition } from "@/components/PageTransition";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SITE, SITE_URL } from "@/lib/config";
+import { ADSENSE, SITE, SITE_URL } from "@/lib/config";
 
-const jakarta = Plus_Jakarta_Sans({
+/*
+ * Jost is the typeface of the legacy Astra site (400 for copy, 500–700 for
+ * headings) — keeping it makes the headless frontend read as the same brand
+ * rather than as a redesign.
+ */
+const jost = Jost({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-jost",
   display: "swap",
 });
 
@@ -43,7 +49,17 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id">
-      <body className={`${jakarta.variable} flex min-h-screen flex-col`}>
+      <body className={`${jost.variable} flex min-h-screen flex-col`}>
+        {/*
+          AdSense loader — present on every page of the legacy site, which is
+          what lets Auto Ads place units outside the explicit slots. Loaded
+          after hydration so it never competes with the render-blocking path.
+        */}
+        <Script
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE.client}`}
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
         <ScrollReveal />
         <SiteHeader />
         <main className="flex-1">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { fetchStaticPage } from "@/lib/graphql";
 import { ignoreMissing, isUpstreamError } from "@/lib/http";
@@ -82,10 +83,20 @@ export default async function StaticPage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-[860px] px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-extrabold sm:text-4xl">{page.title}</h1>
+    <div className="mx-auto max-w-[860px] px-4 py-10 sm:px-6 sm:py-14">
+      <h1 className="text-[2rem] font-bold leading-[1.15] tracking-tight sm:text-[2.5rem]">
+        {page.title}
+      </h1>
+      <nav className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted">
+        <Link href="/" className="transition hover:text-pink">
+          Beranda
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="font-medium text-ink">{page.title}</span>
+      </nav>
+      <hr className="mt-6 w-16 border-t-2 border-ink/70" />
       <article
-        className="prose-headings:font-bold mt-6 space-y-3 text-[15px] leading-relaxed text-ink/85 [&_a]:text-pink [&_a]:underline [&_b]:font-bold [&_h2]:mt-8 [&_h2]:text-xl [&_li]:ml-5 [&_li]:list-disc [&_p]:my-3"
+        className="article-prose mt-7"
         dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(page.content) }}
       />
     </div>

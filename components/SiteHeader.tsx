@@ -10,13 +10,8 @@ const SECONDARY = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-white/80 text-ink backdrop-blur-2xl">
-      {/* brand ribbon — pink → yellow → sky, the anti-black signature */}
-      <div
-        aria-hidden
-        className="h-1 w-full bg-gradient-to-r from-pink via-yellow to-sky-600"
-      />
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6">
+    <header className="sticky top-0 z-50 border-b border-line bg-[#fefefe] text-ink">
+      <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6 sm:h-[88px]">
         <Link href="/" className="inline-flex min-h-11 shrink-0 items-center text-2xl font-extrabold tracking-tight" aria-label="ScreenScore — beranda">
           <span className="text-ink">screen</span>
           <span className="text-pink">score</span>

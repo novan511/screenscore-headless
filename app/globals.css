@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* text-only near-black — large black surfaces are gone by design */
-  --color-ink: #17141a;
-  --color-ink-2: #231e29;
-  --color-ink-3: #322c3a;
+  /*
+   * Palette lifted from the live screenscore.digitalmama.id (Astra global
+   * colours + the Elementor kit): near-charcoal headings, a mid-grey body
+   * copy, an off-white page field and the two brand accents.
+   */
+  --color-ink: #25272d; /* headings — --ast-global-color-2 */
+  --color-ink-2: #3a3f47;
+  --color-ink-3: #4c525b;
 
   /* paper — cool neutrals pulled from the live screenscore.digitalmama.id */
   --color-canvas: #ffffff;
-  --color-surface: #f2f5f7;
-  --color-line: #e6eaef;
+  --color-surface: #f2f5f7; /* page field — --ast-global-color-4/6 */
+  --color-line: #eaeaea; /* header + card rules */
+  --color-sage: #b1b1a7; /* legacy footer field */
+  --color-sage-600: #a3a399;
 
   /* ScreenScore brand — pink is the live-site accent (#f2187c) */
   --color-pink: #f2187c;
@@ -27,13 +33,13 @@
   --color-lav: #f3f0ff;
   --color-lav-600: #7c6ef0;
 
-  --color-muted: #6b6570;
+  --color-muted: #565a61; /* body copy — --ast-global-color-3 */
   --color-ok: #1f9d55;
 
   /* iOS-style motion — strong ease-out used across cards, presses, slides */
   --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
 
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
 }
 
@@ -43,17 +49,39 @@ html {
 
 body {
   background: var(--color-canvas);
-  color: var(--color-ink);
+  color: var(--color-muted);
   /*
-   * Reference `--font-jakarta` directly, not `--font-sans`. Tailwind only
+   * Reference `--font-jost` directly, not `--font-sans`. Tailwind only
    * emits a `@theme` custom property into the stylesheet when a utility
    * consumes it, so `--font-sans` never existed at runtime and `var()`
    * against it silently fell back to the UA system stack — the site rendered
-   * in -apple-system despite downloading Plus Jakarta Sans.
+   * in -apple-system despite downloading the webfont.
    */
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+  font-family: var(--font-jost), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * headings follow the legacy theme: Jost, tight leading, charcoal.
+ *
+ * Kept inside `@layer base` on purpose: Tailwind v4 puts utilities in their
+ * own cascade layer, and an unlayered rule beats every layered one — so a
+ * `text-white` / `leading-*` utility on an <h2> used to lose to this rule
+ * and the heading silently rendered charcoal (invisible on dark bands).
+ */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-ink);
+    line-height: 1.15;
+  }
 }
 
 /* horizontal rails without ugly scrollbars */
@@ -78,6 +106,52 @@ body {
 .rail > * {
   scroll-snap-align: start;
   flex: 0 0 auto;
+}
+
+/*
+ * Loop carousel — the legacy Elementor `loop-carousel` widget.
+ *
+ * The widget shows a fixed number of slides per breakpoint (5/2/2 for the
+ * head carousel, 4/2/1 for the "Top Picks" rows) with 10px gutters, so each
+ * slide is sized as a share of the *scroller*, not of the track: the track
+ * itself grows past the viewport and overflows inside `.ss-slider`, exactly
+ * like `.rail` above. `--ss-cols-*` comes from the component's inline style;
+ * `--ss-cols` is the value the slide maths actually reads.
+ */
+.ss-slider {
+  --ss-gap: 10px;
+  --ss-cols: var(--ss-cols-mobile, 1);
+  position: relative; /* makes every slide's `offsetLeft` scroll-relative */
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.ss-slider::-webkit-scrollbar {
+  display: none;
+}
+/* the legacy widget's tablet/mobile switch points */
+@media (min-width: 768px) {
+  .ss-slider {
+    --ss-cols: var(--ss-cols-tablet, 2);
+  }
+}
+@media (min-width: 1024px) {
+  .ss-slider {
+    --ss-cols: var(--ss-cols-desktop, 4);
+  }
+}
+.ss-track {
+  display: flex;
+  gap: var(--ss-gap);
+}
+.ss-slide {
+  flex: 0 0 calc((100% - (var(--ss-gap) * (var(--ss-cols) - 1))) / var(--ss-cols));
+  scroll-snap-align: start;
+  /* the card boxes carry the surface colour; a half-visible neighbour card
+     must keep its own rounded edge rather than bleed into the gutter */
+  min-width: 0;
 }
 
 .tabular {
@@ -220,6 +294,12 @@ html.ss-reveal-armed .ss-reveal.is-in {
 .ss-stagger > *:nth-child(n + 9) { animation-delay: 360ms; }
 
 /* mobile menu opens */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
 details[open] > .menu-panel {
   animation: ss-menu 180ms var(--ease-ios) both;
 }
@@ -251,8 +331,8 @@ summary .menu-bars {
    ============================================================ */
 .article-prose {
   font-size: 1.025rem;
-  line-height: 1.8;
-  color: color-mix(in srgb, var(--color-ink) 88%, transparent);
+  line-height: 1.75;
+  color: var(--color-muted);
 }
 .article-prose > * {
   margin-top: 1.1rem;
@@ -262,22 +342,26 @@ summary .menu-bars {
 }
 .article-prose h2 {
   scroll-margin-top: 5.5rem;
-  padding-left: 0.95rem;
-  border-left: 4px solid var(--color-pink);
-  font-size: clamp(1.2rem, 2.4vw, 1.4rem);
-  font-weight: 800;
-  line-height: 1.3;
+  /* the legacy page prints section titles as plain oversized headings —
+     no rule, no badge, just Jost 700 in charcoal */
+  margin-top: 2.1rem;
+  font-size: clamp(1.6rem, 3.2vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
   color: var(--color-ink);
 }
 .article-prose h3 {
   scroll-margin-top: 5.5rem;
-  font-size: 1.08rem;
-  font-weight: 800;
+  margin-top: 1.7rem;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.25;
   color: var(--color-ink);
 }
 .article-prose a {
   color: var(--color-pink);
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -300,14 +384,14 @@ summary .menu-bars {
   margin-top: 0.45rem;
 }
 .article-prose li::marker {
-  color: var(--color-pink);
+  color: var(--color-ink);
   font-weight: 700;
 }
 .article-prose blockquote {
   padding: 0.9rem 1.15rem;
   border-left: 4px solid var(--color-pink);
   border-radius: 0 14px 14px 0;
-  background: var(--color-surface);
+  background: var(--color-canvas);
   font-weight: 500;
 }
 .article-prose hr {
@@ -323,8 +407,8 @@ summary .menu-bars {
   padding: 1rem 1.15rem;
   list-style: none;
   border: 1px solid var(--color-line);
-  border-radius: 16px;
-  background: var(--color-surface);
+  border-radius: 12px;
+  background: var(--color-canvas);
   font-size: 0.95rem;
   line-height: 1.65;
 }

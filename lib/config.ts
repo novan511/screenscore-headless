@@ -45,6 +45,39 @@ export const SITE = {
   revalidate: 300,
 } as const;
 
+/**
+ * Google AdSense — mirrors the tag set live on the legacy WordPress site.
+ * The loader runs on every page (Auto Ads is on for the account); the
+ * explicit units below are the same named widgets the theme prints:
+ *
+ *   Screenscore_top_product     product detail, under the breadcrumb
+ *   Screenscore_top_article     archive, above the grid
+ *   Screenscore_after_article   article/archive, below the content
+ *   Screenscore_sidebar_article article sidebar
+ *
+ * Swap the client here if the site ever moves to its own publisher ID —
+ * every placement reads it from this one constant.
+ */
+export const ADSENSE = {
+  client: "ca-pub-8322068530935403",
+  slots: {
+    topProduct: "9565334215",
+    topArticle: "9767248840",
+    afterArticle: "4175106853",
+    sidebarArticle: "7813630232",
+  },
+} as const;
+
+/**
+ * The "About Writer" box every legacy detail page closes with. Products are
+ * authored by the editorial account, so the biography comes from the site
+ * rather than from the product payload.
+ */
+export const SITE_AUTHOR = {
+  name: "Rachmadwipa Novandri",
+  bio: "Seorang pecinta anime, manga, dan animasi sejak 2016 seperti Naruto, Onepiece, Bleach, Hunter X Hunter dan anime lain serta pecinta game dengan berbagai tema baik mobile maupun PC.",
+} as const;
+
 export interface CategoryConfig {
   slug: string;
   name: string;

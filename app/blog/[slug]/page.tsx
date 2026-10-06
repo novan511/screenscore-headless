@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArticleCard } from "@/components/ArticleCard";
+import { AdSlot } from "@/components/AdSlot";
 import { JsonLd } from "@/components/JsonLd";
-import { SITE, siteUrl } from "@/lib/config";
+import { ADSENSE, SITE, siteUrl } from "@/lib/config";
 import { fetchPostDetail, fetchRelatedPosts, postUrl, type BlogPost } from "@/lib/blog";
 import { sanitizeArticleHtml } from "@/lib/utils";
 
@@ -90,7 +90,7 @@ export default async function BlogPostPage({ params }: Props) {
   const description = post.excerpt || post.title;
 
   return (
-    <div className="mx-auto max-w-[860px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 sm:py-14">
       <JsonLd
         data={[
           {
@@ -133,122 +133,187 @@ export default async function BlogPostPage({ params }: Props) {
         ]}
       />
 
-      <nav aria-label="Breadcrumb" className="text-sm font-semibold text-muted">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/" className="hover:text-pink">
-              Beranda
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li>
-            <Link href="/blog" className="hover:text-pink">
-              Artikel
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li className="line-clamp-1 text-ink" aria-current="page">
-            {post.title}
-          </li>
-        </ol>
-      </nav>
-
-      <article className="mt-6">
-        <header>
-          {post.category && (
-            <Link
-              href={`/blog?cat=${post.category.slug}`}
-              className="inline-flex rounded-full bg-mint px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-ink hover:bg-mint-600 hover:text-white"
-            >
-              {post.category.name}
-            </Link>
-          )}
-          <h1 className="mt-4 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0">
+          <h1 className="text-[2rem] font-bold leading-[1.15] tracking-tight text-ink sm:text-[2.5rem]">
             {post.title}
           </h1>
 
-          {/* E-E-A-T: byline, avatar, publish + updated dates, reading time */}
-          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-line bg-surface px-4 py-3">
-            {post.author.avatar ? (
-              <Image
-                src={post.author.avatar}
-                alt={post.author.name}
-                width={40}
-                height={40}
-                className="rounded-full ring-2 ring-white"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span
+          <nav aria-label="Breadcrumb" className="mt-3 text-sm text-muted">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li>
+                <Link href="/" className="hover:text-pink">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden>»</li>
+              <li>
+                <Link href="/blog" className="hover:text-pink">
+                  Blog
+                </Link>
+              </li>
+              <li aria-hidden>»</li>
+              <li className="line-clamp-1 text-ink" aria-current="page">
+                {post.title}
+              </li>
+            </ol>
+          </nav>
+
+          <hr className="mt-6 w-16 border-t-2 border-ink/70" />
+
+          {/* byline — author + publish date, the way the legacy post prints it */}
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted">
+            <span className="inline-flex items-center gap-2">
+              <svg
+                viewBox="0 0 16 16"
+                width="15"
+                height="15"
                 aria-hidden
-                className="grid h-10 w-10 place-items-center rounded-full bg-pink text-sm font-extrabold text-white"
+                className="shrink-0"
               >
-                {post.author.name.slice(0, 1).toUpperCase()}
+                <path
+                  fill="currentColor"
+                  d="M2 12.5 11.5 3l1.5 1.5-9.5 9.5H2v-1.5Zm9.7-7.7 1-1a1 1 0 0 0 0-1.4l-.9-.9a1 1 0 0 0-1.4 0l-1 1 2.3 2.3Z"
+                />
+              </svg>
+              Penulis :{" "}
+              <strong className="font-semibold text-ink">
+                {post.author.name}
+              </strong>
+            </span>
+            <span aria-hidden className="text-line">
+              |
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <svg
+                viewBox="0 0 16 16"
+                width="15"
+                height="15"
+                aria-hidden
+                className="shrink-0"
+              >
+                <path
+                  fill="currentColor"
+                  d="M4 1.5V3H2.5A1.5 1.5 0 0 0 1 4.5V13a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 15 13V4.5A1.5 1.5 0 0 0 13.5 3H12V1.5h-1.5V3h-5V1.5H4ZM2.5 6h11v6.5h-11V6Z"
+                />
+              </svg>
+              <time dateTime={post.date}>{published(post)}</time>
+            </span>
+            {updated && (
+              <span className="text-xs">
+                · Diperbarui <time dateTime={post.modified}>{modified(post)}</time>
               </span>
             )}
-            <div className="text-sm">
-              <p className="font-extrabold text-ink">{post.author.name}</p>
-              <p className="text-xs text-muted">
-                <time dateTime={post.date}>Dipublikasikan {published(post)}</time>
-                {updated && (
-                  <>
-                    {" · "}
-                    <time dateTime={post.modified}>Diperbarui {modified(post)}</time>
-                  </>
-                )}
-                {post.readingMinutes && <> · {post.readingMinutes} menit baca</>}
-              </p>
+            {post.readingMinutes && (
+              <span className="text-xs">· {post.readingMinutes} menit baca</span>
+            )}
+          </div>
+
+          {/* Screenscore_top_article */}
+          <AdSlot
+            slot={ADSENSE.slots.topArticle}
+            label="Screenscore_top_article"
+            className="mt-7"
+          />
+
+          <div
+            className="article-prose mt-7"
+            dangerouslySetInnerHTML={{
+              __html: sanitizeArticleHtml(post.content ?? ""),
+            }}
+          />
+
+          {/* Screenscore_after_article */}
+          <AdSlot
+            slot={ADSENSE.slots.afterArticle}
+            label="Screenscore_after_article"
+            className="mt-9"
+          />
+
+          {post.category && (
+            <p className="mt-8 text-sm text-muted">
+              Kategori :{" "}
+              <Link
+                href={`/blog?cat=${post.category.slug}`}
+                className="font-semibold text-ink hover:text-pink"
+              >
+                {post.category.name}
+              </Link>
+            </p>
+          )}
+
+          {/* Editorial provenance — who stands behind the copy */}
+          <section className="mt-10">
+            <h2 className="text-[1.5rem] font-bold tracking-tight text-ink">
+              About Writer
+            </h2>
+            <div className="mt-4 flex gap-4 rounded-xl bg-surface p-5 sm:gap-5 sm:p-6">
+              {post.author.avatar ? (
+                <Image
+                  src={post.author.avatar}
+                  alt={post.author.name}
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 shrink-0 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-yellow text-xl font-bold text-ink"
+                >
+                  {post.author.name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="text-base font-bold text-ink">
+                  {post.author.name}
+                </p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                  {SITE.tagline} — ulasan dan panduan usia untuk film, serial,
+                  game, e-book, dan aplikasi pilihan keluarga.
+                </p>
+              </div>
             </div>
-          </div>
-        </header>
+          </section>
+        </div>
 
-        <div
-          className="article-prose mt-8"
-          dangerouslySetInnerHTML={{
-            __html: sanitizeArticleHtml(post.content ?? ""),
-          }}
-        />
-
-        {/* Editorial provenance — who stands behind the copy */}
-        <aside className="mt-10 rounded-3xl border border-pink/15 bg-blush p-5 sm:p-6">
-          <h2 className="text-base font-extrabold text-ink">
-            🛡️ Tentang artikel ini
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink/80">
-            Ditulis oleh <strong>{post.author.name}</strong> untuk {SITE.name} —
-            redaksi yang meninjau konten anak berdasarkan rating usia dan skor
-            keamanan 6 dimensi kami. Selalu cocokkan panduan usia di artikel ini
-            dengan kebutuhan keluarga Anda.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link
-              href="/tentang-kami"
-              className="press rounded-full bg-white px-4 py-2 text-xs font-extrabold text-ink border border-line hover:border-pink hover:text-pink"
-            >
-              Cara kami menilai →
-            </Link>
-            <Link
-              href="/films"
-              className="press rounded-full bg-pink px-4 py-2 text-xs font-extrabold text-white hover:bg-pink-600"
-            >
-              Cari tontonan aman
-            </Link>
+        {/* ================= sidebar ================= */}
+        <aside className="space-y-6 lg:pt-4">
+          <div className="rounded-lg bg-surface p-5 text-sm leading-relaxed text-muted">
+            digitalMamaID menghadirkan Screen Score sebagai wadah bagi orang tua
+            untuk mereview konten digital anak. Ulasan dan penilaian ini akan
+            menjadi panduan yang berharga bagi orangtua lainnya dalam
+            menciptakan ruang digital yang aman bagi anak.
           </div>
+
+          {/* Screenscore_sidebar_article */}
+          <AdSlot
+            slot={ADSENSE.slots.sidebarArticle}
+            label="Screenscore_sidebar_article"
+          />
+
+          {related.length > 0 && (
+            <section className="rounded-lg border border-line bg-white p-5">
+              <h2 className="text-xl font-bold text-ink">Artikel Terpopuler</h2>
+              <ul className="mt-4 space-y-5">
+                {related.slice(0, 4).map((p) => (
+                  <li key={p.id}>
+                    <Link href={p.path} className="group block">
+                      <p className="text-[15px] font-bold leading-snug text-ink transition group-hover:text-pink">
+                        {p.title}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm text-muted">
+                        {p.excerpt}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </aside>
-      </article>
-
-      {related.length > 0 && (
-        <section className="mt-14" aria-labelledby="related-heading">
-          <h2 id="related-heading" className="mb-4 text-xl font-extrabold sm:text-2xl">
-            📖 Baca Juga
-          </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {related.map((p, i) => (
-              <ArticleCard key={p.id} post={p} index={i} showExcerpt={false} />
-            ))}
-          </div>
-        </section>
-      )}
+      </div>
     </div>
   );
 }

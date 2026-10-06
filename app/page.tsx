@@ -1,17 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
-import { AgeChips } from "@/components/AgeChips";
-import { ArticleCard } from "@/components/ArticleCard";
-import { Hero } from "@/components/Hero";
 import { JsonLd } from "@/components/JsonLd";
-import { PosterCard, TitleGrid } from "@/components/PosterCard";
-import { Rail } from "@/components/Rail";
+import { HomeFaq } from "@/components/HomeFaq";
 import { SearchForm } from "@/components/SearchForm";
-import { CATEGORIES, CATEGORY_LIST, SITE, siteUrl } from "@/lib/config";
-import { fetchScreenScore } from "@/lib/bridge";
-import { fetchHomeArticles } from "@/lib/blog";
-import { fetchLatest } from "@/lib/store";
+import { TitleRail } from "@/components/TitleRail";
+import { PosterSlider } from "@/components/PosterSlider";
+import { CATEGORIES, SITE, siteUrl } from "@/lib/config";
+import { fetchLatest, fetchTitles } from "@/lib/store";
 import { catchUpstreamBuild } from "@/lib/http";
-import type { ScreenScore, Title } from "@/lib/types";
+import type { Title } from "@/lib/types";
 
 export const revalidate = 300;
 
@@ -24,56 +21,91 @@ const siteSearchAction = {
   "query-input": "required name=search_term_string",
 };
 
-/** Parent-facing trust signals shown as pills under the hero. */
-const TRUST_PILLS = [
-  { emoji: "⭐", label: "Skor ahli di setiap judul" },
-  { emoji: "🎂", label: "Rating usia yang jelas" },
-  { emoji: "👨‍👩‍👧", label: "Kurasi oleh orang tua" },
-] as const;
+/**
+ * The legacy homepage's textured band: a stock desk photo washed out to
+ * near-white (95% overlay, exactly as the Elementor kit does it) so the
+ * charcoal headings keep their contrast.
+ */
+const BAND_IMAGE =
+  "https://screenscore.digitalmama.id/wp-content/uploads/2024/01/services9.jpg";
 
-/** Pastel patch + emoji per category door. */
-const CATEGORY_TILES: Record<
-  string,
-  { bg: string; hover: string; emoji: string }
-> = {
-  film: { bg: "bg-blush", hover: "hover:border-pink", emoji: "🎬" },
-  series: { bg: "bg-cream", hover: "hover:border-yellow-600", emoji: "📺" },
-  game: { bg: "bg-sky", hover: "hover:border-sky-600", emoji: "🎮" },
-  "e-books": { bg: "bg-mint", hover: "hover:border-mint-600", emoji: "📚" },
-  aplikasi: { bg: "bg-lav", hover: "hover:border-lav-600", emoji: "📱" },
-};
+/** The promo video the reference embeds under the search band. */
+const YT_RECOMMEND = "RUM5Ffp9WOA";
 
-/** The six reviewflow safety dimensions shown in the methodology band. */
-const SCORE_DIMENSIONS = [
-  "Pesan Positif",
-  "Kekerasan",
-  "Merokok / Alkohol / Narkoba",
-  "Dialog Kasar",
-  "Adegan Seksual",
-  "Keberagaman",
-] as const;
+/** Legacy outline button: pink hairline, 4px radius, 15px medium. */
+function OutlineLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="press inline-flex min-h-11 items-center justify-center rounded-[4px] border border-pink px-6 py-[13px] text-[15px] font-medium text-pink transition hover:bg-pink hover:text-white"
+    >
+      {children}
+    </Link>
+  );
+}
+
+/** Section heading + blurb + centred button (the two CTA blocks). */
+function CenteredCta({
+  id,
+  heading,
+  blurb,
+  href,
+  cta,
+  className = "py-14 sm:py-16",
+}: {
+  id: string;
+  heading: string;
+  blurb: string;
+  href: string;
+  cta: string;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`text-center ss-reveal ${className}`}
+      ss-reveal=""
+      aria-labelledby={id}
+    >
+      <h2
+        id={id}
+        className="text-[2rem] font-semibold leading-[1.08] tracking-tight text-ink sm:text-[2.6rem] lg:text-[3rem]"
+      >
+        {heading}
+      </h2>
+      <p className="mx-auto mt-2 max-w-[44rem] text-base text-muted">{blurb}</p>
+      <div className="mt-6">
+        <OutlineLink href={href}>{cta}</OutlineLink>
+      </div>
+    </section>
+  );
+}
 
 export default async function HomePage() {
   // Build-phase tolerance: if WordPress blips during `vercel build`, ship a
   // degraded shell (replaced at first revalidation) instead of failing the
   // whole deployment. Runtime behaviour is unchanged — visitors still get
   // the error boundary with retry. See `catchUpstreamBuild`.
-  const [film, game, series, ebooks, apps, articles] = await Promise.all([
-    fetchLatest("film", 7).catch(catchUpstreamBuild([])),
-    fetchLatest("game", 12).catch(catchUpstreamBuild([])),
-    fetchLatest("series", 12).catch(catchUpstreamBuild([])),
-    fetchLatest("e-books", 12).catch(catchUpstreamBuild([])),
-    fetchLatest("aplikasi", 12).catch(catchUpstreamBuild([])),
-    fetchHomeArticles(4).catch(catchUpstreamBuild([])),
+  const [latest, film, game, ebooks] = await Promise.all([
+    fetchTitles({ perPage: 12, orderby: "date", order: "desc" })
+      .then((p) => p.items)
+      .catch(catchUpstreamBuild<Title[]>([])),
+    fetchLatest("film", 8).catch(catchUpstreamBuild<Title[]>([])),
+    fetchLatest("game", 8).catch(catchUpstreamBuild<Title[]>([])),
+    fetchLatest("e-books", 8).catch(catchUpstreamBuild<Title[]>([])),
   ]);
 
-  const heroItems = film.slice(0, 7);
-  const scores = await loadScores(heroItems);
-
-  // Prefer a title with an editor score for the hero slot.
-  const withScore = heroItems.find((t) => scores[t.slug]?.score != null);
-  const featured = withScore ?? heroItems[0];
-  const rest = heroItems.filter((t) => t.slug !== featured?.slug).slice(0, 6);
+  // The promo band promotes one title with a written hook, like the legacy
+  // "Best Recommend On YouTube" block.
+  const promo = film.find((t) => t.excerpt) ?? film[0];
+  // The wide slot wants the backdrop when the product has one; otherwise the
+  // poster cropped to 16:9 is still the best frame we have.
+  const promoImage = promo?.images[1]?.src ?? promo?.images[0]?.src;
 
   return (
     <>
@@ -97,207 +129,183 @@ export default async function HomePage() {
           ],
         }}
       />
-      {featured && (
-        <Hero
-          featured={featured}
-          rest={rest}
-          scores={scores}
-        />
-      )}
 
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
-        {/* parent trust strip — the Common Sense Media promise, kid-sized */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {TRUST_PILLS.map((p) => (
-            <span
-              key={p.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-xs font-bold text-ink shadow-sm sm:text-sm"
-            >
-              <span aria-hidden>{p.emoji}</span> {p.label}
-            </span>
-          ))}
+      <div className="bg-surface">
+        {/* ============ newest across the catalogue — the head carousel ============ */}
+        <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10">
+          {latest.length > 0 && (
+            <div className="ss-reveal" ss-reveal="">
+              <PosterSlider
+                items={latest.slice(0, 6)}
+                cols={{ desktop: 5, tablet: 2, mobile: 2 }}
+                label="Terbaru"
+                autoplay
+              />
+            </div>
+          )}
+
+          <TitleRail
+            id="top-picks-film"
+            heading="Top Picks Film"
+            blurb="Pilihan film dan series buat kamu"
+            items={film}
+          />
+          <TitleRail
+            id="top-picks-game"
+            heading="Top Picks Game"
+            blurb="Pilihan game buat kamu"
+            items={game}
+          />
+          <TitleRail
+            id="top-picks-ebooks"
+            heading="Top Picks E-books"
+            blurb="Pilihan E-book buat kamu"
+            items={ebooks}
+          />
         </div>
 
-        {/* age-band entry — the kid-safety promise of the product */}
-        <section className="mt-8 rounded-3xl border border-pink/15 bg-blush p-5 sm:p-6 ss-reveal" ss-reveal="">
-          <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg font-extrabold text-ink">
-              🎂 Pilih sesuai usia anak
-            </h2>
-            <span className="text-sm text-muted">
-              Setiap judul punya rating usia &amp; poin keamanan
-            </span>
-          </div>
-          <div className="mt-4">
-            <AgeChips basePath="/films" />
+        {/* ============ CTA #1 ============ */}
+        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+          <CenteredCta
+            id="film-anak"
+            heading="Film Terbaik untuk Anak"
+            blurb="Lihat hasil review dari tontonan anak berikut"
+            href={CATEGORIES.film.path}
+            cta="Lihat Semua Film"
+          />
+        </div>
+
+        {/* ============ search band + the promo video riding its lower edge ============ */}
+        <section
+          className="ss-reveal"
+          ss-reveal=""
+          aria-labelledby="home-search"
+          style={{
+            backgroundColor: "#f3f5f7",
+            backgroundImage: `linear-gradient(rgba(245, 245, 245, 0.95), rgba(245, 245, 245, 0.95)), url(${BAND_IMAGE})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="mx-auto max-w-[1200px] px-4 pb-0 pt-16 sm:px-6 sm:pt-24">
+            <div className="mx-auto max-w-[760px] text-center">
+              <h1
+                id="home-search"
+                className="text-[2rem] font-medium leading-[1.3] tracking-tight text-ink sm:text-[2.45rem]"
+              >
+                Cari Review Film Favoritmu Sekarang
+              </h1>
+              <p className="mx-auto mt-3 max-w-[36rem] text-base text-muted">
+                Cari tontonan terbaik untuk anak sekarang juga
+              </p>
+              <div className="mx-auto mt-7 max-w-[750px]">
+                <SearchForm variant="boxed" />
+              </div>
+            </div>
+
+            <div className="mx-auto -mb-16 mt-8 w-full max-w-[760px] overflow-hidden rounded-[20px] shadow-[0_55px_50px_-40px_#212121] sm:-mb-24 sm:mt-12">
+              <div className="relative aspect-video w-full bg-ink">
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src={`https://www.youtube.com/embed/${YT_RECOMMEND}`}
+                  title="Rekomendasi ScreenScore di YouTube"
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </div>
         </section>
 
-        <Rail
-          heading="🎬 Film Terbaru"
-          blurb="Review film pilihan untuk keluarga"
-          href={CATEGORIES.film.path}
-          items={film.slice(0, 12)}
-        />
+        {/* ============ CTA #2 ============ */}
+        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+          <CenteredCta
+            id="game-anak"
+            heading="Game"
+            blurb="Lihat hasil review dari game anak berikut"
+            href={CATEGORIES.game.path}
+            cta="Lihat Semua Game"
+            /* the promo video above overhangs this section by ~96px */
+            className="pt-36 pb-14 sm:pt-48 sm:pb-16"
+          />
+        </div>
 
-        {/* parenting articles — fresh picks from the Tips & Ulasan desk */}
-        {articles.length > 0 && (
-          <section className="mt-12 ss-reveal" ss-reveal="" aria-labelledby="articles-heading">
-            <div className="mb-4 flex items-end justify-between gap-4">
-              <div>
-                <h2 id="articles-heading" className="text-xl font-extrabold sm:text-2xl">
-                  💡 Tips & Artikel untuk Orang Tua
-                </h2>
-                <p className="mt-0.5 text-sm text-muted">
-                  Panduan digital, ulasan, dan kabar pilihan dari redaksi
-                </p>
-              </div>
+        {/* ============ YouTube promo — dark editorial band ============ */}
+        {promo && (
+          <section className="bg-ink ss-reveal" ss-reveal="" aria-labelledby="promo-heading">
+            <div className="mx-auto grid max-w-[1200px] items-center gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-12 lg:py-20">
               <Link
-                href="/blog"
-                className="inline-flex min-h-11 shrink-0 items-center rounded-md px-1 text-sm font-bold text-pink hover:underline"
+                href={`/content/${promo.slug}`}
+                className="press group relative block aspect-video w-full overflow-hidden rounded-xl bg-ink-3"
+                aria-label={`Buka ${promo.name}`}
               >
-                Lihat semua artikel →
+                {promoImage && (
+                  <Image
+                    src={promoImage}
+                    alt=""
+                    fill
+                    loading="lazy"
+                    quality={70}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="object-cover opacity-70 transition duration-500 group-hover:scale-[1.03] group-hover:opacity-90"
+                  />
+                )}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-tr from-ink/70 via-ink/25 to-transparent"
+                />
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="grid h-16 w-16 place-items-center rounded-full border border-white/80 text-white transition duration-300 group-hover:scale-110 group-hover:border-pink group-hover:bg-pink/90">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5.5v13l11-6.5-11-6.5z" />
+                    </svg>
+                  </span>
+                </span>
               </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {articles.map((post, i) => (
-                <ArticleCard key={post.id} post={post} index={i} />
-              ))}
+
+              <div className="max-w-xl">
+                <p className="flex items-center gap-2.5 text-[1.15rem] font-semibold text-white">
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                    className="shrink-0 text-[#ff0000]"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M23.5 6.9a3 3 0 0 0-2.1-2.1C19.6 4.3 12 4.3 12 4.3s-7.6 0-9.4.5A3 3 0 0 0 .5 6.9C0 8.7 0 12 0 12s0 3.3.5 5.1a3 3 0 0 0 2.1 2.1c1.8.5 9.4.5 9.4.5s7.6 0 9.4-.5a3 3 0 0 0 2.1-2.1c.5-1.8.5-5.1.5-5.1s0-3.3-.5-5.1zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"
+                    />
+                  </svg>
+                  Best Recommend On YouTube
+                </p>
+
+                <h2
+                  id="promo-heading"
+                  className="mt-4 text-[1.85rem] font-semibold leading-[1.12] tracking-tight text-[#f2f5f7] sm:text-[2.4rem]"
+                >
+                  {promo.name}
+                </h2>
+                <p className="mt-3 text-base leading-relaxed text-white/80">
+                  {promo.excerpt}
+                </p>
+
+                <Link
+                  href={`/content/${promo.slug}`}
+                  className="press mt-6 inline-flex min-h-11 items-center rounded-[4px] border border-white/40 px-6 py-[13px] text-[15px] font-medium text-white transition hover:border-pink hover:bg-pink"
+                >
+                  Baca review lengkap
+                </Link>
+              </div>
             </div>
           </section>
         )}
 
-        <Rail
-          heading="🎮 Game & Aplikasi"
-          blurb="Main dengan nilai positif"
-          href={CATEGORIES.game.path}
-          items={[...game.slice(0, 6), ...apps.slice(0, 6)]}
-        />
-        <Rail
-          heading="📺 Serial Terbaru"
-          blurb="Episode yang aman ditonton bersama"
-          href={CATEGORIES.series.path}
-          items={series}
-        />
-        <Rail
-          heading="📚 E-Books"
-          blurb="Tumbuhkan minat baca sejak dini"
-          href={CATEGORIES["e-books"].path}
-          items={ebooks}
-        />
-
-        {/* methodology — the E-E-A-T "how we review" band */}
-        <section
-          className="mt-14 rounded-3xl border border-sky-600/20 bg-sky p-6 sm:p-8 ss-reveal"
-          ss-reveal=""
-          aria-labelledby="method-heading"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="max-w-xl">
-              <h2 id="method-heading" className="text-xl font-extrabold text-ink sm:text-2xl">
-                🛡️ Bagaimana ScreenScore menilai
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ink/75">
-                Setiap judul ditinjau editor kami pada 6 dimensi keamanan untuk
-                anak, lalu diberi Skor ScreenScore 0–5 — supaya orang tua bisa
-                memutuskan dengan tenang sebelum menekan play.
-              </p>
-              <Link
-                href="/tentang-kami"
-                className="press mt-4 inline-flex min-h-11 items-center rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-ink border border-line hover:border-pink hover:text-pink"
-              >
-                Pelajari metodologi kami →
-              </Link>
-            </div>
-            <ul className="flex flex-wrap gap-2" aria-label="Dimensi penilaian">
-              {SCORE_DIMENSIONS.map((d) => (
-                <li
-                  key={d}
-                  className="rounded-full border border-sky-600/25 bg-white px-3.5 py-1.5 text-xs font-bold text-ink"
-                >
-                  {d}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* category doors */}
-        <section className="mt-14 ss-reveal" ss-reveal="">
-          <h2 className="mb-4 text-xl font-extrabold sm:text-2xl">
-            🚪 Jelajahi Semua
-          </h2>
-          <TitleGrid className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-            {CATEGORY_LIST.map((c) => {
-              const tile = CATEGORY_TILES[c.slug] ?? CATEGORY_TILES.film;
-              return (
-                <Link
-                  key={c.slug}
-                  href={c.path}
-                  className={`press group rounded-2xl border border-white p-5 ${tile.bg} ${tile.hover}`}
-                >
-                  <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-2xl shadow-sm transition-transform duration-300 ease-out group-hover:-rotate-6 group-hover:scale-125">
-                    {tile.emoji}
-                  </span>
-                  <p className="mt-3 font-extrabold text-ink">{c.name}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted">
-                    {c.blurb}
-                  </p>
-                </Link>
-              );
-            })}
-          </TitleGrid>
-        </section>
-
-        {/* search CTA — pink band replaces the old black block */}
-        <section className="relative mt-14 overflow-hidden rounded-3xl bg-pink p-8 text-center text-white sm:p-10 ss-reveal" ss-reveal="">
-          <div
-            aria-hidden
-            className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-yellow/30 blur-2xl"
-          />
-          <div
-            aria-hidden
-            className="absolute -bottom-12 -right-6 h-44 w-44 rounded-full bg-white/15 blur-2xl"
-          />
-          <div className="relative">
-            <h2 className="text-2xl font-extrabold sm:text-3xl">
-              ✨ Cari review tontonan favoritmu
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-white/90">
-              Ketik judul film, serial, game, atau e-book — kami tunjukkan skor
-              keamanannya untuk anak.
-            </p>
-            <div className="mx-auto mt-5 max-w-lg">
-              <SearchForm />
-            </div>
-          </div>
-        </section>
-
-        {/* latest reviewed grid */}
-        <section className="mt-14 ss-reveal" ss-reveal="">
-          <h2 className="mb-4 text-xl font-extrabold sm:text-2xl">
-            🆕 Baru Ditambahkan
-          </h2>
-          <TitleGrid>
-            {film.slice(0, 6).map((t) => (
-              <PosterCard key={t.id} title={t} />
-            ))}
-          </TitleGrid>
-        </section>
+        {/* ============ FAQ ============ */}
+        <HomeFaq />
       </div>
     </>
   );
-}
-
-/** Editor scores for hero items only (bounded bridge fetches). */async function loadScores(items: Title[]): Promise<Record<string, ScreenScore | null>> {
-  const entries = await Promise.all(
-    items.slice(0, 7).map(async (t) => {
-      try {
-        return [t.slug, await fetchScreenScore(t.permalink)] as const;
-      } catch {
-        return [t.slug, null] as const;
-      }
-    }),
-  );
-  return Object.fromEntries(entries);
 }
