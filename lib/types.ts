@@ -41,6 +41,29 @@ export interface Title {
   excerpt?: string;
 }
 
+/**
+ * Card-sized projection of a Title — exactly the fields `PosterCard` reads.
+ *
+ * Client components (the homepage `PosterSlider` rows) receive this instead
+ * of the full `Title`, because whatever crosses a server→client boundary is
+ * serialised into the RSC payload: shipping the ~10KB article `body` per card
+ * inflated the homepage HTML to 672KB and made first paint wait on parsing a
+ * 460KB inline script. Server components can still pass a full `Title` — it
+ * structurally satisfies this type.
+ */
+export interface TitleCard {
+  id: number;
+  slug: string;
+  name: string;
+  /** Poster only — cards never show gallery images. */
+  images: TitleImage[];
+  categories: Term[];
+  averageRating: number;
+  reviewCount: number;
+  year?: string;
+  ageRating?: string;
+}
+
 /** Embedded trailer pulled from the WordPress page (Elementor video widget). */
 export interface Trailer {
   provider: "youtube";

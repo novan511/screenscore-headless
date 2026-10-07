@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PosterCard } from "./PosterCard";
-import type { Title } from "@/lib/types";
+import type { TitleCard } from "@/lib/types";
 
 /**
  * Looping poster carousel — the legacy site's Elementor `loop-carousel`
@@ -46,7 +46,7 @@ export function PosterSlider({
   label,
   autoplay = false,
 }: {
-  items: Title[];
+  items: TitleCard[];
   cols: Cols;
   /** Accessible name for the carousel region. */
   label: string;
@@ -279,7 +279,18 @@ export function PosterSlider({
                   className="h-full rounded-[4px] bg-white p-5"
                   inert={clone || undefined}
                 >
-                  <PosterCard title={title} />
+                  <PosterCard
+                    title={title}
+                    /*
+                     * Carousels make the LCP candidate unpredictable: any
+                     * initially-visible slide (and, after a few autoplay
+                     * steps, any advanced slide) can be it. The head row
+                     * eager-loads its six unique slides — slide 0 also gets
+                     * the preload hint; rails only need their first card.
+                     */
+                    priority={autoplay && !clone && i === 0}
+                    eager={!clone && (autoplay || i === 0)}
+                  />
                 </div>
               </div>
             );

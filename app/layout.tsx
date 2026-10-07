@@ -6,7 +6,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { ADSENSE, SITE, SITE_URL } from "@/lib/config";
+import { ADSENSE, SITE, SITE_URL, WP_SITE } from "@/lib/config";
 
 /*
  * Jost is the typeface of the legacy Astra site (400 for copy, 500–700 for
@@ -51,13 +51,25 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${jost.variable} flex min-h-screen flex-col`}>
         {/*
+          Warm up the two origins the page reaches for right after first
+          paint: the WordPress CDN (the washed-out band photo on the
+          homepage) and YouTube's thumbnail host behind the video facade.
+          React hoists these into <head>.
+        */}
+        <link rel="preconnect" href={WP_SITE} />
+        <link rel="dns-prefetch" href={WP_SITE} />
+        <link rel="preconnect" href="https://i.ytimg.com" crossOrigin="" />
+        {/*
           AdSense loader — present on every page of the legacy site, which is
-          what lets Auto Ads place units outside the explicit slots. Loaded
-          after hydration so it never competes with the render-blocking path.
+          what lets Auto Ads place units outside the explicit slots.
+          `lazyOnload`: it waits for the window `load` event, so the
+          220KB of adsbygoogle + show_ads_impl JS never competes with
+          rendering, hydration or the LCP image (it was the largest remaining
+          main-thread cost in the PageSpeed report).
         */}
         <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE.client}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           crossOrigin="anonymous"
         />
         <ScrollReveal />

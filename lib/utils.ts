@@ -279,3 +279,23 @@ export function metaDescription(
   return clamp(text, max);
 }
 
+
+/**
+ * Project a full `Title` down to the card fields before it crosses into a
+ * client component — see `TitleCard`. Keeps article bodies and tag lists out
+ * of the RSC payload on every page that renders a poster card from a client
+ * boundary (today: the homepage carousel rows).
+ */
+export function toCard(t: import("./types").Title): import("./types").TitleCard {
+  return {
+    id: t.id,
+    slug: t.slug,
+    name: t.name,
+    images: t.images.slice(0, 1),
+    categories: t.categories.slice(0, 1),
+    averageRating: t.averageRating,
+    reviewCount: t.reviewCount,
+    year: t.year,
+    ageRating: t.ageRating,
+  };
+}

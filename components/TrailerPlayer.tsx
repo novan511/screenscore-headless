@@ -15,7 +15,6 @@ export function TrailerPlayer({
   title: string;
 }) {
   const thumbs = [
-    `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`,
     `https://i.ytimg.com/vi/${youtubeId}/hq720.jpg`,
     `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
   ];

@@ -4,18 +4,24 @@ const WP_SITE = process.env.NEXT_PUBLIC_WP_SITE ?? "https://screenscore.digitalm
 
 const nextConfig: NextConfig = {
   images: {
-    // AVIF first: ~35% smaller than WebP at the same quality. WebP is the
-    // fallback for browsers that cannot decode it.
-    formats: ["image/avif", "image/webp"],
+    // WebP only: AVIF encodes ~10x slower, and on a cold `/_next/image` hit
+    // (fresh deploy, new upload) that encode plus the already-slow upstream
+    // fetch pushed variants past the optimizer timeout — retina screens
+    // request the larger variants, so posters sat blank for a minute.
+    // WebP encodes fast enough that cold hits complete in well under a
+    // second once the source is downloaded.
+    formats: ["image/webp"],
     // Keep optimised variants warm for a day so repeat views never re-encode.
     minimumCacheTTL: 86400,
     /**
      * Next's default leaves a hole between 1200 and 1920, so a common
      * 1280px-wide hero requested `w=1920` — ~40% more bytes than it needed.
-     * 1440/1600 close it, and capping at 2560 avoids multi-second AVIF
-     * encodes of 3840px sources on first view.
+     * 1440/1600 close it. Capped at 1920: poster cards render at ≤340 CSS px
+     * (≤680 at DPR 2) so 1600/2048/2560 entries never win the srcset pick —
+     * they only added three dead URLs to all 61 `<img>` tags on the homepage
+     * (~40KB of HTML that had to be parsed before first paint).
      */
-    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1600, 1920, 2048, 2560],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920],
     // next/image warns for every quality not listed here (required in Next 16).
     // 70 = cards/heroes, 55 = blurred hero backdrop, 75 = detail poster.
     qualities: [55, 70, 75],
@@ -38,6 +44,13 @@ const nextConfig: NextConfig = {
    * render with no edge cache. Their content is public and identical per URL
    * (the CDN keys on the query string), so let it hold them for the same
    * window ISR uses elsewhere.
+   *
+   * NOTE: the route-level `private` Cache-Control wins over the
+   * `Cache-Control` line below (same header name — measured: archives still
+   * returned `private, no-cache` with MISS every time). The
+   * `Vercel-CDN-Cache-Control` line is the one that actually takes effect: it
+   * is a different header so the route does not overwrite it, and the edge
+   * honours it for shared caching even on dynamic routes.
    */
   async headers() {
     return [
@@ -48,6 +61,10 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "public, s-maxage=300, stale-while-revalidate=86400",
+          },
+          {
+            key: "Vercel-CDN-Cache-Control",
+            value: "s-maxage=300, stale-while-revalidate=86400",
           },
         ],
       },

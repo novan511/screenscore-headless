@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Title } from "@/lib/types";
+import type { TitleCard } from "@/lib/types";
 import { RatingStars } from "./RatingStars";
 import { cx } from "@/lib/utils";
 
@@ -20,11 +20,24 @@ export function PosterCard({
   title,
   score,
   width,
+  priority = false,
+  eager = false,
 }: {
-  title: Title;
+  title: TitleCard;
   score?: number | null;
   /** Fixed pixel width for horizontal rails; omit inside a grid. */
   width?: number;
+  /**
+   * Eager-load with a preload hint — reserved for the one card that sits
+   * first in the head carousel and can become the page's LCP.
+   */
+  priority?: boolean;
+  /**
+   * Eager-load without the preload hint (Lighthouse's LCP discovery audit
+   * fails on any `loading="lazy"` LCP candidate, and in a carousel that can
+   * be *any* of the initially-visible slides — not just the first).
+   */
+  eager?: boolean;
 }) {
   const poster = title.images[0];
   const category = title.categories[0]?.name;
@@ -45,6 +58,8 @@ export function PosterCard({
             src={poster.src}
             alt={poster.alt || title.name}
             fill
+            priority={priority}
+            loading={eager && !priority ? "eager" : undefined}
             sizes={width ? `${width}px` : GRID_SIZES}
             quality={70}
             className="object-cover"
