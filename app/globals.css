@@ -275,7 +275,7 @@ html.ss-reveal-armed .ss-reveal:not(.is-in) {
   opacity: 0;
   transform: translate3d(0, 16px, 0);
 }
-html.ss-reveal-armed .ss-reveal.is-in {
+html.ss-reveal-armed .ss-reveal.is-in:not(.instant) {
   animation: ss-rise 520ms var(--ease-ios) both;
 }
 

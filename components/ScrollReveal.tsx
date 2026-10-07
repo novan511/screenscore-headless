@@ -24,14 +24,19 @@ export function ScrollReveal() {
 
     const viewportH = window.innerHeight || 0;
 
-    // Visible right now → settle immediately, no observer needed.
+    // Visible right now → settle immediately, no observer needed. The
+    // `instant` class keeps ScrollReveal from *replaying* the entrance
+    // animation at hydration: these were already painted, and fading them
+    // 1 → 0 → 1 again pushed the LCP element's render delay by ~2.3s in the
+    // production audit (everything above the fold blinked back in when the
+    // observer armed).
     const visible: HTMLElement[] = [];
     const hidden: HTMLElement[] = [];
     for (const el of pending) {
       const rect = el.getBoundingClientRect();
       const inView = rect.top < viewportH * 0.98 && rect.bottom > 0;
       (inView ? visible : hidden).push(el);
-      if (inView) el.classList.add("is-in");
+      if (inView) el.classList.add("is-in", "instant");
     }
 
     // Hide only the rest — armed after the visible ones are already safe.

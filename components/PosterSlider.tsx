@@ -258,7 +258,13 @@ export function PosterSlider({
           if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) setStopped(true);
         }}
       >
-        <div className="ss-track ss-stagger">
+        {/* No `ss-stagger` here on purpose: the cascade starts every slide at
+            opacity 0, which held the above-the-fold cards out of the first
+            paints — Lighthouse then fell back to the header logo as the LCP
+            element (element render delay 2.3s in the production audit).
+            Cards are visible from the first paint; rails/grids elsewhere
+            keep their cascade. */}
+        <div className="ss-track">
           {slides.map((title, i) => {
             const clone = loop && i >= count;
             return (
