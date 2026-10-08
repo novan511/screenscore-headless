@@ -58,6 +58,9 @@ export function TitleRail({
       className="mt-12 sm:mt-16 ss-reveal"
       ss-reveal=""
       aria-labelledby={id}
+      /* ScrollReveal writes data-ss-reveal after SSR but before this
+         streamed segment hydrates — tell React not to diff it. */
+      suppressHydrationWarning
     >
       <h2
         id={id}

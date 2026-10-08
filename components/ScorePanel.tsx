@@ -19,7 +19,13 @@ export function ScorePanel({
   if (!score && !community) return null;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-line bg-white ss-reveal" ss-reveal="">
+    <section
+      className="overflow-hidden rounded-xl border border-line bg-white ss-reveal"
+      ss-reveal=""
+      /* ScrollReveal writes data-ss-reveal after SSR but before this
+         streamed segment hydrates — tell React not to diff it. */
+      suppressHydrationWarning
+    >
       <div className="flex flex-col gap-6 p-5 sm:flex-row sm:p-6">
         {/* score box */}
         {score?.score != null && (

@@ -18,7 +18,14 @@ export function Rail({
 }) {
   if (!items.length) return null;
   return (
-    <section className="mt-12 ss-reveal" ss-reveal="">
+    <section
+      className="mt-12 ss-reveal"
+      ss-reveal=""
+      /* ScrollReveal sets data-ss-reveal on this element after the server
+         render but before this segment hydrates (the layout effect runs
+         first), so the attribute is legitimately absent from the props. */
+      suppressHydrationWarning
+    >
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <h2 className="text-xl font-extrabold sm:text-2xl">{heading}</h2>

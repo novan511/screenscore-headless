@@ -283,15 +283,19 @@ body {
 
 /*
  * Scroll reveal. Hidden state is armed by components/ScrollReveal.tsx *after*
- * hydration, and only for what is off-screen — the class is added in the same
- * synchronous pass that marks visible elements, so nothing ever flashes.
- * Without JS the class never appears and every section renders normally.
+ * hydration, and only for what is off-screen — the data-ss-reveal marker is
+ * written in the same synchronous pass that marks visible elements, so
+ * nothing ever flashes. The state lives in a data attribute (not a class)
+ * because React never renders it and therefore never compares it against the
+ * server HTML during hydration of streamed boundaries.
+ * Without JS the html.ss-reveal-armed class never appears and every section
+ * renders normally.
  */
-html.ss-reveal-armed .ss-reveal:not(.is-in) {
+html.ss-reveal-armed .ss-reveal:not([data-ss-reveal]) {
   opacity: 0;
   transform: translate3d(0, 16px, 0);
 }
-html.ss-reveal-armed .ss-reveal.is-in:not(.instant) {
+html.ss-reveal-armed .ss-reveal[data-ss-reveal="in"] {
   animation: ss-rise 520ms var(--ease-ios) both;
 }
 

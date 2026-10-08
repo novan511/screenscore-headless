@@ -89,6 +89,9 @@ function CenteredCta({
       className={`text-center ss-reveal ${className}`}
       ss-reveal=""
       aria-labelledby={id}
+      /* ScrollReveal writes data-ss-reveal after SSR but before this
+         streamed segment hydrates — tell React not to diff it. */
+      suppressHydrationWarning
     >
       <h2
         id={id}
@@ -262,7 +265,9 @@ export default function HomePage() {
       <div className="bg-surface">
         {/* ============ newest across the catalogue — the head carousel ============ */}
         <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10">
-          <div className="ss-reveal" ss-reveal="">
+          {/* suppressHydrationWarning: ScrollReveal marks this wrapper
+              visible before its streamed content hydrates. */}
+          <div className="ss-reveal" ss-reveal="" suppressHydrationWarning>
             <Suspense fallback={<SliderSkeleton cols={HEAD_COLS} label="Terbaru" />}>
               <HeadCarousel />
             </Suspense>
@@ -304,6 +309,7 @@ export default function HomePage() {
           className="ss-reveal"
           ss-reveal=""
           aria-labelledby="home-search"
+          suppressHydrationWarning
           style={{
             backgroundColor: "#f3f5f7",
             backgroundImage: `linear-gradient(rgba(245, 245, 245, 0.95), rgba(245, 245, 245, 0.95)), url(${BAND_IMAGE})`,
@@ -352,10 +358,10 @@ export default function HomePage() {
         </div>
 
         {/* ============ YouTube promo — dark editorial band (streams) ============
-            The reveal class lives on this static wrapper — a streamed section
+            The reveal marker lives on this static wrapper — a streamed section
             would otherwise miss ScrollReveal's hydration scan and stay stuck
             at opacity 0. */}
-        <div className="ss-reveal" ss-reveal="">
+        <div className="ss-reveal" ss-reveal="" suppressHydrationWarning>
           <Suspense fallback={<PromoSkeleton />}>
             <PromoBand />
           </Suspense>

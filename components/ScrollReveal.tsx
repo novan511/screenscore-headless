@@ -12,20 +12,29 @@ import { useLayoutEffect } from "react";
  * Runs in a layout effect: everything already in view is marked visible in the
  * same synchronous pass that turns hiding on, so the reader never sees an
  * empty section waiting for hydration.
+ *
+ * Reveal state travels in a `data-ss-reveal` attribute instead of an
+ * `is-in`/`instant` class. This layout effect runs as soon as the shell
+ * hydrates, but streamed Suspense boundaries hydrate *later* — mutating
+ * `className` on a not-yet-hydrated node makes React report a hydration
+ * mismatch ("server rendered HTML didn't match the client properties"),
+ * because `className` is a prop React re-checks while hydrating. React never
+ * renders `data-ss-reveal`, so it never compares it and the attribute is safe
+ * to set before (or after) hydration.
  */
 export function ScrollReveal() {
   const pathname = usePathname();
 
   useLayoutEffect(() => {
     const pending = Array.from(
-      document.querySelectorAll<HTMLElement>("[ss-reveal]:not(.is-in)"),
+      document.querySelectorAll<HTMLElement>("[ss-reveal]:not([data-ss-reveal])"),
     );
     if (!pending.length) return;
 
     const viewportH = window.innerHeight || 0;
 
     // Visible right now → settle immediately, no observer needed. The
-    // `instant` class keeps ScrollReveal from *replaying* the entrance
+    // `instant` state keeps ScrollReveal from *replaying* the entrance
     // animation at hydration: these were already painted, and fading them
     // 1 → 0 → 1 again pushed the LCP element's render delay by ~2.3s in the
     // production audit (everything above the fold blinked back in when the
@@ -36,7 +45,7 @@ export function ScrollReveal() {
       const rect = el.getBoundingClientRect();
       const inView = rect.top < viewportH * 0.98 && rect.bottom > 0;
       (inView ? visible : hidden).push(el);
-      if (inView) el.classList.add("is-in", "instant");
+      if (inView) el.setAttribute("data-ss-reveal", "instant");
     }
 
     // Hide only the rest — armed after the visible ones are already safe.
@@ -45,7 +54,7 @@ export function ScrollReveal() {
     if (!hidden.length) return;
 
     if (!("IntersectionObserver" in window)) {
-      hidden.forEach((el) => el.classList.add("is-in"));
+      hidden.forEach((el) => el.setAttribute("data-ss-reveal", "in"));
       return;
     }
 
@@ -53,7 +62,7 @@ export function ScrollReveal() {
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          entry.target.classList.add("is-in");
+          entry.target.setAttribute("data-ss-reveal", "in");
           observer.unobserve(entry.target);
         }
       },
@@ -63,7 +72,7 @@ export function ScrollReveal() {
 
     // Never leave copy stuck invisible if the observer misbehaves.
     const failsafe = window.setTimeout(() => {
-      hidden.forEach((el) => el.classList.add("is-in"));
+      hidden.forEach((el) => el.setAttribute("data-ss-reveal", "in"));
     }, 3000);
 
     return () => {

@@ -30,7 +30,10 @@ export async function ArchiveView({
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
-      <header className="mb-6 ss-reveal" ss-reveal="">
+      {/* suppressHydrationWarning: ScrollReveal sets data-ss-reveal before
+          this streamed segment hydrates — React never renders that attribute,
+          so there is nothing to patch up. */}
+      <header className="mb-6 ss-reveal" ss-reveal="" suppressHydrationWarning>
         <h1 className="text-3xl font-extrabold sm:text-4xl">{category.name}</h1>
         <p className="mt-1.5 max-w-2xl text-sm text-muted">{category.blurb}</p>
         <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted tabular">
