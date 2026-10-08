@@ -131,6 +131,22 @@ body {
 .ss-slider::-webkit-scrollbar {
   display: none;
 }
+/* Desktop affordance: the legacy widget relies on Swiper's simulateTouch,
+   so the row should read as grabbable and show a grabbing hand while the
+   pointer owns it (touch devices are unaffected — native scroll already
+   shows the right feedback there). */
+@media (hover: hover) and (pointer: fine) {
+  .ss-slider {
+    cursor: grab;
+  }
+  .ss-slider.ss-dragging {
+    cursor: grabbing;
+    /* Text/images must not start a selection or a native drag ghost
+       mid-gesture — `touch-action` stays alone so momentum scroll works. */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
 /* the legacy widget's tablet/mobile switch points */
 @media (min-width: 768px) {
   .ss-slider {
