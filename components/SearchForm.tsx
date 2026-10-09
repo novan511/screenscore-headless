@@ -9,10 +9,20 @@ export function SearchForm({
   autoFocus = false,
   defaultValue = "",
   variant = "pill",
+  id = "q",
 }: {
   autoFocus?: boolean;
   defaultValue?: string;
   variant?: "pill" | "boxed";
+  /**
+   * Input id, which the visible label is wired to.
+   *
+   * The header renders this component twice — once in the bar, once inside the
+   * mobile menu — so a fixed id produced two elements with `id="q"` and two
+   * `<label for="q">` pointing at an ambiguous target. Each instance passes
+   * its own id.
+   */
+  id?: string;
 }) {
   if (variant === "boxed") {
     return (
@@ -22,11 +32,11 @@ export function SearchForm({
         role="search"
         className="flex w-full items-stretch overflow-hidden rounded-[3px] bg-white ring-1 ring-line"
       >
-        <label className="sr-only" htmlFor="q-boxed">
+        <label className="sr-only" htmlFor={id}>
           Cari judul
         </label>
         <input
-          id="q-boxed"
+          id={id}
           name="q"
           type="search"
           required
@@ -53,11 +63,11 @@ export function SearchForm({
 
   return (
     <form action="/search" method="get" role="search" className="w-full">
-      <label className="sr-only" htmlFor="q">
+      <label className="sr-only" htmlFor={id}>
         Cari judul
       </label>
       <input
-        id="q"
+        id={id}
         name="q"
         type="search"
         required

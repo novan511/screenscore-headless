@@ -19,6 +19,13 @@
 
   /* ScreenScore brand — pink is the live-site accent (#f2187c) */
   --color-pink: #f2187c;
+  /*
+   * Pink is the live-site accent, but #f2187c only reaches 4.04:1 on white
+   * and 3.69:1 on the surface field — below AA for body-size text. This is
+   * the same hue one step down (5.26:1 on white, 4.80:1 on surface) and is
+   * what links, inline emphasis and outlined CTAs now use. `pink` itself is
+   * kept for fills, where white-on-pink is a large/bold pairing.
+   */
   --color-pink-600: #d1106a;
   --color-yellow: #ffd400;
   --color-yellow-600: #e6be00;
@@ -27,11 +34,11 @@
   --color-blush: #fff0f6;
   --color-cream: #fff8e1;
   --color-sky: #eaf4ff;
-  --color-sky-600: #2f9be0;
+  --color-sky-600: #166aa3;
   --color-mint: #e9f9f0;
-  --color-mint-600: #17a673;
+  --color-mint-600: #0d7a50;
   --color-lav: #f3f0ff;
-  --color-lav-600: #7c6ef0;
+  --color-lav-600: #5b4dd6;
 
   --color-muted: #565a61; /* body copy — --ast-global-color-3 */
   --color-ok: #1f9d55;
@@ -45,6 +52,39 @@
 
 html {
   scroll-behavior: smooth;
+  /*
+   * The header is sticky and 64px tall on phones / 89px from `sm` up, so any
+   * in-page anchor (the article TOC, `#review-member`) used to land *under*
+   * it. One token keeps every `scroll-mt-*` in step with the header.
+   */
+  --ss-header-h: 4rem;
+  scroll-padding-top: calc(var(--ss-header-h) + 0.75rem);
+}
+@media (min-width: 640px) {
+  html {
+    --ss-header-h: 5.5rem;
+  }
+}
+
+/*
+ * The one page shell.
+ *
+ * The header, the archives and the homepage previously declared their own
+ * `max-w-[1280px]` / `max-w-[1200px]` wrappers, so on any desktop wider than
+ * 1280 the logo sat 40px left of the content column it was supposed to align
+ * with. One class, one width — a page can no longer drift out of line with
+ * the header without editing this rule.
+ */
+.ss-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1280px;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .ss-container {
+    padding-inline: 1.5rem;
+  }
 }
 
 body {
@@ -346,6 +386,69 @@ summary .menu-bars {
 }
 
 /* ============================================================
+   Detail teaser — the legacy product short description rendered raw.
+   The HTML arrives as <div> blocks (intro, "Genre:" list, "Sinopsis:",
+   then every section of the review), so spacing is driven off sibling
+   rules; <h2> inside it is the big 48px section heading of the ref.
+   ============================================================ */
+.teaser {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+.teaser > * + *,
+.teaser > div > * + * {
+  margin-top: 0.75rem;
+}
+.teaser h2 {
+  margin-top: 1.5rem;
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.teaser h3 {
+  margin-top: 1.25rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+.teaser ul,
+.teaser ol {
+  /* the ref indents the bullet/number list 48px off the copy column */
+  padding-left: 3rem;
+}
+.teaser ul {
+  list-style: disc;
+}
+.teaser ol {
+  list-style: decimal;
+}
+.teaser li + li {
+  margin-top: 0.25rem;
+}
+.teaser b,
+.teaser strong {
+  font-weight: 700;
+  color: inherit;
+}
+.teaser a {
+  /* pink-600, not pink: these are body-size links and #f2187c only reaches
+     4.04:1 on the white copy column. */
+  color: var(--color-pink-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.teaser img {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.75rem;
+  border-radius: 8px;
+}
+
+/* ============================================================
    Detail-page article — editorial typesetting for WP copy.
    Section titles arrive as promoted <h2>, fact sheets as .ss-facts.
    ============================================================ */
@@ -361,7 +464,7 @@ summary .menu-bars {
   margin-top: 0;
 }
 .article-prose h2 {
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: var(--ss-header-h);
   /* the legacy page prints section titles as plain oversized headings —
      no rule, no badge, just Jost 700 in charcoal */
   margin-top: 2.1rem;
@@ -372,7 +475,7 @@ summary .menu-bars {
   color: var(--color-ink);
 }
 .article-prose h3 {
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: var(--ss-header-h);
   margin-top: 1.7rem;
   font-size: clamp(1.15rem, 2vw, 1.35rem);
   font-weight: 700;
@@ -380,7 +483,9 @@ summary .menu-bars {
   color: var(--color-ink);
 }
 .article-prose a {
-  color: var(--color-pink);
+  /* Same reason as `.teaser a` — body-size link text, so it needs the 5.26:1
+     step rather than the 4.04:1 brand pink. */
+  color: var(--color-pink-600);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -502,6 +607,18 @@ summary .menu-bars {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  /*
+   * Render the final state instead of merely shortening the animation.
+   * ScrollReveal still marks off-screen copy `opacity: 0` while it waits for
+   * the IntersectionObserver, so on its own the reduced-motion block below
+   * would only make each section blink into place — the movement is gone but
+   * the hide-then-reveal flash remains. Lifting the hidden state outright means
+   * a reduced-motion reader gets the finished page immediately.
+   */
+  html.ss-reveal-armed .ss-reveal:not([data-ss-reveal]) {
+    opacity: 1;
+    transform: none;
   }
   *,
   *::before,

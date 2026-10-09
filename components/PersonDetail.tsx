@@ -52,11 +52,11 @@ export async function PersonDetail({
   const bioHtml = bio?.bioHtml ?? "";
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+    <div className="ss-container py-10">
       <nav className="mb-6 text-xs font-semibold text-muted">
-        <Link href="/" className="hover:text-pink">Beranda</Link>
+        <Link href="/" className="hover:text-pink-600">Beranda</Link>
         <span> / </span>
-        <Link href={KIND_HOME[kind]} className="hover:text-pink">
+        <Link href={KIND_HOME[kind]} className="hover:text-pink-600">
           {KIND_LABEL[kind]}
         </Link>
         <span> / </span>
@@ -120,7 +120,7 @@ export function RelatedPeopleBlock({
 }) {
   const excludeSlug = path.split("/").filter(Boolean).pop() ?? path;
   return (
-    <div className="mx-auto max-w-[1280px] px-4 pb-10 sm:px-6">
+    <div className="ss-container pb-10">
       <Suspense fallback={<RelatedSkeleton />}>
         <RelatedPeople kind={kind} excludeSlug={excludeSlug} />
       </Suspense>
@@ -176,7 +176,7 @@ async function RelatedPeople({
                 />
               )}
             </div>
-            <p className="mt-2 line-clamp-2 text-xs font-bold group-hover:text-pink">
+            <p className="mt-2 line-clamp-2 text-xs font-bold group-hover:text-pink-600">
               {p.title}
             </p>
           </Link>

@@ -9,7 +9,6 @@ import { TrailerPlayer } from "@/components/TrailerPlayer";
 import { ReviewWriter } from "@/components/ReviewWriter";
 import { MemberReviews, ReviewsSkeleton } from "@/components/MemberReviews";
 import { JsonLd } from "@/components/JsonLd";
-import { renderArticle } from "@/lib/article";
 import {
   fetchScreenScore,
   fetchTitleSeo,
@@ -21,12 +20,17 @@ import {
   SITE,
   SITE_AUTHOR,
   WP_SITE,
-  AGE_TAGS,
   productPermalink,
   siteUrl,
 } from "@/lib/config";
 import { fetchRelated, fetchTitleBySlug } from "@/lib/store";
-import { stripTags, clamp, metaDescription } from "@/lib/utils";
+import {
+  stripTags,
+  clamp,
+  metaDescription,
+  sanitizeArticleHtml,
+  imageDims,
+} from "@/lib/utils";
 import type { Title } from "@/lib/types";
 
 export const revalidate = 300;
@@ -88,8 +92,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Trailer lives on film/series pages only — other categories skip the section. */
-const TRAILER_CATEGORIES = new Set(["film", "series"]);
+/**
+ * The legacy site ships two single-product templates:
+ *
+ *  - **watch** (film/series): a 330px poster column on the left, the H1 and
+ *    breadcrumb in the right column, then trailer, teaser, Q&A, the
+ *    reviewflow gate and the "Full Review" toggle. The legacy markup prints
+ *    the H1 twice (desktop + mobile variant toggled by `elementor-hidden`);
+ *    we mirror that so the phone layout reads H1 → breadcrumb → full-bleed
+ *    poster exactly like the reference.
+ *  - **full width** (game/e-books/aplikasi): everything stacked full width
+ *    with the whole gallery rendered above the copy, no Q&A / Full Review.
+ *
+ * Both render the short description *raw* — the same HTML WordPress serves —
+ * so "Sinopsis:", the fact list and the section headings inside it land where
+ * the legacy page puts them.
+ */
+const WATCH_CATEGORIES = new Set(["film", "series"]);
+
+/** Long-form WP HTML with `<h1>` demoted — the document already owns the H1. */
+function proseHtml(html: string): string {
+  return sanitizeArticleHtml(html).replace(
+    /<\/?h1>/g,
+    (tag) => (tag === "</h1>" ? "</h2>" : "<h2>"),
+  );
+}
 
 export default async function TitlePage({ params }: Props) {
   const { slug } = await params;
@@ -105,29 +132,23 @@ export default async function TitlePage({ params }: Props) {
 
   const category = title.categories[0];
   const poster = title.images[0];
-  const categoryPath = category ? CATEGORIES[category.slug]?.path ?? "/films" : null;
+  const categoryPath = category
+    ? CATEGORIES[category.slug]?.path ?? "/films"
+    : null;
+  const isWatch = !!category && WATCH_CATEGORIES.has(category.slug);
+  const showTrailer = isWatch && !!trailer;
+  const posterDims = poster
+    ? imageDims(poster.srcSet, poster.src)
+    : null;
 
-  /*
-   * Common Sense Media-style cross-link: when the product carries a "Kelompok
-   * Umur" tag, the age chip becomes a door to the same archive pre-filtered
-   * for that age band — parents deciding "is this for my kid?" get one tap to
-   * "show me more like this for this age". Pure server-rendered link, no JS.
-   */
-  const ageTag = title.tags.find((t) =>
-    AGE_TAGS.some((a) => a.slug === t.slug),
-  );
-  const ageHref =
-    ageTag && categoryPath
-      ? `${categoryPath}?age=${encodeURIComponent(ageTag.slug)}`
-      : null;
-
-  const showTrailer = !!(
-    trailer &&
-    category &&
-    TRAILER_CATEGORIES.has(category.slug)
-  );
-  const article = renderArticle(title.body);
-  const showScore = !!score || title.averageRating > 0;
+  // The teaser is the product short description exactly as WP prints it —
+  // intro, "Genre:" bullet list, "Sinopsis:" label and every section after.
+  const teaserHtml = title.shortDescription
+    ? proseHtml(title.shortDescription)
+    : "";
+  const descriptionHtml = title.description
+    ? proseHtml(title.description)
+    : "";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -190,320 +211,265 @@ export default async function TitlePage({ params }: Props) {
     ],
   };
 
+  const breadcrumb = (
+    <nav
+      aria-label="Breadcrumb"
+      className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[15px] leading-[1.6] text-muted"
+    >
+      <Link href="/" className="transition hover:text-pink-600">
+        Beranda
+      </Link>
+      <span aria-hidden>/</span>
+      {category && categoryPath && (
+        <>
+          <Link href={categoryPath} className="transition hover:text-pink-600">
+            {category.name}
+          </Link>
+          <span aria-hidden>/</span>
+        </>
+      )}
+      <span>{title.name}</span>
+    </nav>
+  );
+
+  const adSlot = (
+    <AdSlot
+      slot={ADSENSE.slots.topProduct}
+      label="Screenscore_top_product"
+      className="mt-3"
+    />
+  );
+
+  const teaser = teaserHtml ? (
+    <div className="teaser" dangerouslySetInnerHTML={{ __html: teaserHtml }} />
+  ) : null;
+
+  const scorePanel = score ? (
+    <div className="mt-10">
+      <ScorePanel score={score} title={title} />
+    </div>
+  ) : null;
+
+  const reviewGate = (
+    <ReviewWriter
+      slug={slug}
+      postId={title.id}
+      wpSite={WP_SITE}
+      returnPath={siteUrl(`/content/${slug}`)}
+    />
+  );
+
+  const description = descriptionHtml ? (
+    <div
+      className="article-prose"
+      dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+    />
+  ) : null;
+
+  // "Konten Lainnya" sits further away from About Writer on the watch
+  // template than on the full-width one — measured off the reference.
+  const relatedGap = isWatch ? "mt-[140px]" : "mt-[72px]";
+
   return (
     <>
       <JsonLd data={structuredData} />
 
-      {/* ============ head — the legacy page opens with the H1, then the
-           breadcrumb, then the top ad slot, then the media row ============ */}
       <div className="bg-surface">
-        <div className="mx-auto max-w-[1200px] px-4 pb-16 pt-8 sm:px-6 sm:pt-10">
-          <h1 className="text-[2rem] font-bold leading-[1.1] tracking-tight text-ink sm:text-[2.6rem]">
-            {title.name}
-          </h1>
-
-          <nav className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted">
-            <Link href="/" className="transition hover:text-pink">
-              Beranda
-            </Link>
-            <span aria-hidden>/</span>
-            {category && categoryPath && (
-              <>
-                <Link href={categoryPath} className="transition hover:text-pink">
-                  {category.name}
-                </Link>
-                <span aria-hidden>/</span>
-              </>
-            )}
-            <span className="font-medium text-ink">{title.name}</span>
-          </nav>
-
-          {/* Screenscore_top_product */}
-          <AdSlot
-            slot={ADSENSE.slots.topProduct}
-            label="Screenscore_top_product"
-            className="mt-6"
-          />
-
-          <div className="mt-7 flex flex-col gap-7 sm:flex-row sm:gap-9">
-            {/* poster — the legacy gallery frame: plain white card, no halo.
-                Full-bleed on phones (the column is only ~360px wide there),
-                then the fixed 46/56 thumb widths from sm up. */}
-            <div
-              className="relative w-full shrink-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-line sm:w-48 lg:w-56"
-              style={{ aspectRatio: "2 / 3" }}
-            >
-              {poster && (
-                <Image
-                  src={poster.src}
-                  alt={poster.alt || title.name}
-                  fill
-                  priority
-                  sizes="(max-width: 640px) 160px, 224px"
-                  quality={75}
-                  className="object-cover"
-                />
-              )}
-            </div>
-
-            {/* summary block — chips, short description, score, tags */}
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap gap-2 text-[11px] font-extrabold uppercase tracking-wide">
-                {category && (
-                  <span className="rounded bg-pink px-2.5 py-1 text-white">
-                    {category.name}
-                  </span>
-                )}
-                {title.year && (
-                  <span className="rounded border border-line bg-white px-2.5 py-1 text-muted">
-                    {title.year}
-                  </span>
-                )}
-                {title.ageRating &&
-                  (ageHref ? (
-                    <Link
-                      href={ageHref}
-                      title={`Lihat ${category?.name ?? "judul"} lain untuk usia ini`}
-                      className="tabular rounded bg-yellow px-2.5 py-1 text-ink transition hover:bg-yellow-600 hover:underline"
-                    >
-                      {title.ageRating}
-                    </Link>
-                  ) : (
-                    <span className="tabular rounded bg-yellow px-2.5 py-1 text-ink">
-                      {title.ageRating}
-                    </span>
-                  ))}
+        <div className="ss-container pb-16 pt-8 sm:pt-[70px]">
+          {isWatch ? (
+            <>
+              {/* phone: H1 + breadcrumb first, poster below them */}
+              <div className="sm:hidden">
+                <h1 className="text-[2rem] font-normal leading-[1.4] text-ink">
+                  {title.name}
+                </h1>
+                {breadcrumb}
               </div>
 
-              {title.excerpt && (
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
-                  {title.excerpt}
-                </p>
-              )}
-
-              {/* score chip + community rating */}
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2.5">
-                {score?.score != null && (
-                  <span className="flex items-center gap-2.5 rounded-lg bg-yellow px-3.5 py-2 text-ink">
-                    <b className="tabular text-xl font-extrabold leading-none">
-                      {score.score.toFixed(1)}
-                    </b>
-                    <span className="text-[9px] font-extrabold uppercase leading-[1.15] tracking-wider">
-                      Screen
-                      <br />
-                      Score
-                    </span>
-                  </span>
-                )}
-                {title.reviewCount > 0 && (
-                  <span className="tabular text-sm font-semibold text-muted">
-                    ★ {title.averageRating.toFixed(1)} · {title.reviewCount} review
-                    orang tua
-                  </span>
-                )}
-              </div>
-
-              {title.tags.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {title.tags.slice(0, 5).map((t) => (
-                    <span
-                      key={t.id}
-                      className="rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-semibold text-muted"
+              <div className="flex flex-col gap-6 sm:flex-row sm:gap-x-[30px]">
+                {/* poster — full-bleed on phones, the 184px gallery thumb
+                    inside the 330px column from sm up (x130 in the ref). */}
+                {poster && (
+                  /* self-start: hug the poster instead of stretching to the
+                     full row height (the box would otherwise match the whole
+                     right column). */
+                  <div className="mt-5 shrink-0 self-start sm:mt-0 sm:w-[330px]">
+                    <div
+                      className="relative w-full overflow-hidden rounded bg-white sm:w-[184px]"
+                      style={{
+                        aspectRatio: posterDims
+                          ? `${posterDims.w} / ${posterDims.h}`
+                          : "2 / 3",
+                      }}
                     >
-                      {t.name}
-                    </span>
-                  ))}
+                      <Image
+                        src={poster.src}
+                        alt={poster.alt || title.name}
+                        fill
+                        priority
+                        sizes="(max-width: 640px) 100vw, 184px"
+                        quality={75}
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="min-w-0 flex-1 sm:pl-2.5">
+                  <h1 className="hidden text-[2rem] font-normal leading-[1.4] text-ink sm:block sm:text-[47px]">
+                    {title.name}
+                  </h1>
+                  <div className="hidden sm:block">{breadcrumb}</div>
+
+                  {adSlot}
+
+                  {showTrailer && trailer && (
+                    <div className="mt-6">
+                      <TrailerPlayer
+                        youtubeId={trailer.id}
+                        title={title.name}
+                      />
+                    </div>
+                  )}
+
+                  {teaser && <div className="mt-4">{teaser}</div>}
+
+                  {scorePanel}
+
+                  {/* Questions & Answers — static reviewflow markup, the
+                      legacy widget has no guest ask form either. */}
+                  <div className="mt-10 max-w-[640px]">
+                    <h3 className="inline-block border-b-[3px] border-[#f8ff00] pb-3 text-[20px] font-bold leading-[1.2] text-ink">
+                      Questions &amp; Answers
+                    </h3>
+                    <p className="mt-5 rounded-lg bg-[#f8f8f8] p-4 text-center text-sm text-[#666]">
+                      Please log in to ask a question.
+                    </p>
+                    <div className="mt-4">
+                      <p className="rounded-xl border-2 border-dashed border-[#e0e0e0] bg-[#f8f8f8] p-8 text-center text-sm text-[#666]">
+                        No questions yet. Be the first to ask!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-10">{reviewGate}</div>
+
+                  {/* Full Review — the legacy popup becomes a native inline
+                      disclosure carrying the member reviews. */}
+                  <details id="review-member" className="mt-5 scroll-mt-[var(--ss-header-h)]">
+                    <summary className="press inline-flex cursor-pointer list-none items-center rounded-lg border-2 border-[#f8ff00] bg-[#f8ff00] px-6 py-2.5 text-sm font-semibold leading-[25.6px] text-[#1a1a1a] hover:border-[#d4db00] hover:bg-[#d4db00]">
+                      Full Review
+                    </summary>
+                    <Suspense fallback={<ReviewsSkeleton />}>
+                      <MemberReviews
+                        postId={title.id}
+                        permalink={title.permalink}
+                      />
+                    </Suspense>
+                  </details>
+
+                  {description && <div className="mt-10">{description}</div>}
+
+                  <AboutWriter className="mt-5" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="text-[30px] font-normal leading-[1.3] text-ink">
+                {title.name}
+              </h1>
+              {breadcrumb}
+              {adSlot}
+
+              {/* whole gallery stacked, natural size capped at the column */}
+              {title.images.length > 0 && (
+                <div className="mt-6 space-y-5">
+                  {title.images.map((img, i) => {
+                    const dims = imageDims(img.srcSet, img.src);
+                    return (
+                      <Image
+                        key={img.src}
+                        src={img.src}
+                        alt={img.alt || title.name}
+                        width={dims?.w ?? 1200}
+                        height={dims?.h ?? 800}
+                        priority={i === 0}
+                        sizes="(max-width: 1200px) 100vw, 1180px"
+                        quality={75}
+                        className="h-auto max-w-full rounded-lg"
+                      />
+                    );
+                  })}
                 </div>
               )}
 
-              {/* CTAs */}
-              {(showTrailer || article.html) && (
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {showTrailer && (
-                    <a
-                      href="#trailer"
-                      className="press inline-flex items-center gap-2 rounded bg-yellow px-5 py-2.5 text-sm font-bold text-ink hover:bg-yellow-600"
-                    >
-                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden>
-                        <path fill="currentColor" d="M8 5.5v13l11-6.5z" />
-                      </svg>
-                      Putar Trailer
-                    </a>
-                  )}
-                  {article.html && (
-                    <a
-                      href="#ulasan"
-                      className="press inline-flex items-center rounded border border-line bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:border-ink"
-                    >
-                      Baca Review
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+              {teaser && <div className="mt-6">{teaser}</div>}
 
-          {/* signature score box — sits on the page field instead of
-              straddling a dark hero band */}
-          {showScore && (
-            <div className="mt-8">
-              <ScorePanel score={score} title={title} />
-            </div>
+              {scorePanel}
+
+              <div className="mt-5">{reviewGate}</div>
+
+              {description && <div className="mt-28">{description}</div>}
+
+              <AboutWriter className="mt-12" />
+            </>
           )}
 
-        {/* ================= trailer ================= */}
-        {showTrailer && trailer && (
-          <section id="trailer" className="mt-12 scroll-mt-24 sm:mt-16">
-            <div className="mx-auto max-w-4xl">
-              <header className="mb-4">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
-                  Video
-                </p>
-                <h2 className="mt-1.5 text-xl font-extrabold sm:text-2xl">
-                  Tonton Trailer Resmi
-                </h2>
-              </header>
-              <TrailerPlayer youtubeId={trailer.id} title={title.name} />
-            </div>
-          </section>
-        )}
-
-        {/* ================= review gate — the legacy page prints the
-            "login atau daftar" box above the article ================= */}
-        <section className="mt-10">
-          <div className="mx-auto max-w-[46rem]">
-            <ReviewWriter
-              slug={slug}
-              postId={title.id}
-              wpSite={WP_SITE}
-              returnPath={siteUrl(`/content/${slug}`)}
-            />
-          </div>
-        </section>
-
-        {/* ================= article ================= */}
-        {article.html && (
-          <section id="ulasan" className="mt-12 scroll-mt-24 sm:mt-14">
-            <div className="w-full max-w-[62rem]">
-              {article.toc.length >= 3 ? (
-                <nav
-                  aria-label="Daftar isi"
-                  className="mb-9 rounded-xl border border-line bg-white p-5 sm:p-6"
-                >
-                  <p className="mb-3.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
-                    Daftar Isi
-                  </p>
-                  <ol className="grid gap-1 sm:grid-cols-2">
-                    {article.toc.map((item, i) => (
-                      <li key={item.id}>
-                        <a
-                          href={`#${item.id}`}
-                          className="press flex items-baseline gap-2.5 rounded-md px-1.5 py-1 text-sm font-semibold text-ink hover:text-pink"
-                        >
-                          <span className="tabular text-xs font-extrabold text-muted">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          {item.text}
-                        </a>
-                      </li>
-                    ))}
-                  </ol>
-                </nav>
-              ) : (
-                <header className="mb-7">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
-                    Ulasan
-                  </p>
-                  <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">
-                    Review Lengkap &amp; Sinopsis
-                  </h2>
-                </header>
-              )}
-
-              <div
-                className="article-prose"
-                dangerouslySetInnerHTML={{ __html: article.html }}
-              />
-            </div>
-          </section>
-        )}
-
-        {/* ================= about writer ================= */}
-        <section className="mt-14 max-w-[62rem]">
-          <h2 className="text-[1.6rem] font-bold tracking-tight text-ink">
-            About Writer
-          </h2>
-          <div className="mt-4 flex gap-4 rounded-xl bg-[#f7f5f2] p-5 sm:gap-5 sm:p-6">
-            <span
-              aria-hidden
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-yellow text-lg font-bold text-ink"
+          {/* Konten Lainnya — related titles cost a second Store API round
+              trip (~2.8s cold), so they stream in behind the copy. */}
+          {category && (
+            <Suspense
+              fallback={<RelatedGridSkeleton gapClass={relatedGap} />}
             >
-              {SITE_AUTHOR.name.slice(0, 1).toUpperCase()}
-            </span>
-            <div className="min-w-0">
-              <p className="text-base font-bold text-ink">{SITE_AUTHOR.name}</p>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                {SITE_AUTHOR.bio}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ================= member reviews ================= */}
-        <section id="review-member" className="mt-14 scroll-mt-24 sm:mt-16">
-          <div className="max-w-[62rem]">
-            <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-              <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
-                  Komunitas
-                </p>
-                <h2 className="mt-1.5 text-xl font-bold sm:text-2xl">
-                  Review Member
-                </h2>
-              </div>
-              <p className="text-xs font-semibold text-muted">
-                Wajib login · Ditinjau admin sebelum tampil
-              </p>
-            </header>
-
-            <div className="mt-5">
-              <Suspense fallback={<ReviewsSkeleton />}>
-                <MemberReviews postId={title.id} permalink={title.permalink} />
-              </Suspense>
-            </div>
-          </div>
-        </section>
-
-        {/* Konten Lainnya — related titles cost a second Store API round trip
-            (~2.8s cold), so they stream in behind the article. */}
-        {category && (
-          <Suspense fallback={<RelatedGridSkeleton />}>
-            <RelatedGrid
-              categorySlug={category.slug}
-              excludeSlug={title.slug}
-              tagSlugs={title.tags.map((t) => t.slug)}
-            />
-          </Suspense>
-        )}
+              <RelatedGrid
+                categorySlug={category.slug}
+                excludeSlug={title.slug}
+                tagSlugs={title.tags.map((t) => t.slug)}
+                gapClass={relatedGap}
+              />
+            </Suspense>
+          )}
         </div>
       </div>
     </>
   );
 }
 
+/** "About Writer" — name + bio on the gray card the legacy author box prints. */
+function AboutWriter({ className = "" }: { className?: string }) {
+  return (
+    <section className={className}>
+      <h3 className="text-[32px] font-semibold leading-[1.2] text-ink">
+        About Writer
+      </h3>
+      <div className="mt-5 rounded-xl bg-[#f1f1f1] px-6 py-4 sm:pl-[72px]">
+        <p className="text-base font-bold leading-[1.5] text-ink">
+          {SITE_AUTHOR.name}
+        </p>
+        <p className="mt-1.5 text-base leading-[1.75] text-muted">
+          {SITE_AUTHOR.bio}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /**
  * "Konten Lainnya" — the legacy page closes with a four-up card grid of
  * sibling titles. Card anatomy mirrors the Elementor post card: image on
- * top, title, then a small caps READ MORE.
+ * top, 21px title, then a small caps READ MORE.
  */
 async function RelatedGrid({
   categorySlug,
   excludeSlug,
   tagSlugs,
+  gapClass,
 }: {
   categorySlug: string;
   excludeSlug: string;
   tagSlugs: string[];
+  gapClass: string;
 }) {
   const related = await fetchRelated(
     categorySlug,
@@ -514,11 +480,11 @@ async function RelatedGrid({
   if (!related.length) return null;
 
   return (
-    <section className="mt-14">
-      <h2 className="text-[1.9rem] font-bold tracking-tight text-ink sm:text-[2.1rem]">
+    <section className={gapClass}>
+      <h2 className="text-[2rem] font-semibold leading-[1.25] text-ink sm:text-[3rem]">
         Konten Lainnya
       </h2>
-      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-[35px] lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-x-[30px] gap-y-[30px] lg:grid-cols-4">
         {related.slice(0, 4).map((t) => (
           <RelatedCard key={t.id} title={t} />
         ))}
@@ -553,11 +519,11 @@ function RelatedCard({ title }: { title: Title }) {
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <p className="line-clamp-2 text-[15px] font-bold leading-snug text-ink group-hover:text-pink">
+      <div className="flex flex-1 flex-col px-[30px] pb-[30px] pt-5">
+        <h3 className="text-[21px] font-semibold leading-[1.2] text-ink group-hover:text-pink-600">
           {title.name}
-        </p>
-        <span className="mt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-muted transition group-hover:text-pink">
+        </h3>
+        <span className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-muted transition group-hover:text-pink-600">
           Read More
         </span>
       </div>
@@ -566,16 +532,16 @@ function RelatedCard({ title }: { title: Title }) {
 }
 
 /** Four white card shells — the same footprint as the streamed-in grid. */
-function RelatedGridSkeleton() {
+function RelatedGridSkeleton({ gapClass }: { gapClass: string }) {
   return (
-    <section className="mt-14" aria-busy="true">
+    <section className={gapClass} aria-busy="true">
       <div className="h-9 w-56 rounded skeleton" />
-      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-[35px] lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-x-[30px] gap-y-[30px] lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="overflow-hidden rounded-lg bg-white shadow-sm">
             <div className="skeleton w-full" style={{ aspectRatio: "4 / 5" }} />
-            <div className="p-4">
-              <div className="skeleton h-4 w-4/5 rounded" />
+            <div className="px-[30px] pb-[30px] pt-5">
+              <div className="skeleton h-6 w-4/5 rounded" />
               <div className="skeleton mt-3 h-3 w-20 rounded" />
             </div>
           </div>

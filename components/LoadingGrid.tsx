@@ -13,7 +13,7 @@ export function LoadingGrid({
 }) {
   return (
     <div
-      className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6"
+      className="ss-container py-10"
       aria-busy="true"
       aria-live="polite"
     >

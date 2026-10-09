@@ -90,7 +90,7 @@ export default async function SearchPage({
   const hasPeople = people.length > 0;
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+    <div className="ss-container py-10">
       <h1 className="text-2xl font-extrabold sm:text-3xl">Cari</h1>
       <div className="mt-4 max-w-xl">
         <SearchForm defaultValue={query} />
@@ -142,7 +142,7 @@ export default async function SearchPage({
                     />
                   )}
                 </div>
-                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink">
+                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink-600">
                   {p.title}
                 </p>
                 <p className="text-[11px] uppercase tracking-wide text-muted">

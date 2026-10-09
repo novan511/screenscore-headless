@@ -187,6 +187,38 @@ export function stripMetaList(html: string): string {
   });
 }
 
+/**
+ * Best-effort intrinsic dimensions for a WooCommerce-style `srcset`.
+ *
+ * The Store API sends responsive images without `width`/`height`, which
+ * forces us into `aspect-ratio` placeholders that can shift layout. Many of
+ * those `srcset` entries are resized copies whose *filename* carries the
+ * pixel size (`poster-300x450.jpg`) or whose descriptor is the max width
+ * (`... 1200w`). Parse both: the largest `-WxH` pair wins, otherwise fall
+ * back to the max `Nw` descriptor with a default 2:3 poster ratio.
+ */
+export function imageDims(
+  srcset?: string | null,
+  src?: string | null,
+): { w: number; h: number } | null {
+  const set = [srcset, src].filter(Boolean).join(" ");
+  if (!set) return null;
+
+  let best: { w: number; h: number } | null = null;
+  for (const m of set.matchAll(/(\d{2,5})x(\d{2,5})\.(?:jpe?g|png|webp)/gi)) {
+    const w = parseInt(m[1], 10);
+    const h = parseInt(m[2], 10);
+    if (w >= 100 && h >= 100 && (!best || w > best.w)) best = { w, h };
+  }
+  if (best) return best;
+
+  let maxW = 0;
+  for (const m of set.matchAll(/(\d{2,5})w\b/g)) {
+    maxW = Math.max(maxW, parseInt(m[1], 10));
+  }
+  return maxW >= 100 ? { w: maxW, h: Math.round((maxW * 3) / 2) } : null;
+}
+
 /** Pagination window helper. */
 export function pageWindow(page: number, totalPages: number, span = 2): number[] {
   const start = Math.max(1, page - span);

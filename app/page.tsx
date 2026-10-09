@@ -61,7 +61,13 @@ function OutlineLink({
   return (
     <Link
       href={href}
-      className="press inline-flex min-h-11 items-center justify-center rounded-[4px] border border-pink px-6 py-[13px] text-[15px] font-medium text-pink transition hover:bg-pink hover:text-white"
+      /*
+        `pink` measures 3.69:1 on the surface field — fine for a 3px border,
+        short of AA for the 15px label itself. The label therefore uses
+        `pink-600` (4.80:1) while the hairline and the hover fill keep the
+        brighter brand pink.
+      */
+      className="press inline-flex min-h-11 items-center justify-center rounded-[4px] border border-pink px-6 py-[13px] text-[15px] font-medium text-pink-600 transition hover:bg-pink hover:text-white"
     >
       {children}
     </Link>
@@ -148,7 +154,7 @@ async function PromoBand() {
 
   return (
     <section className="bg-ink" aria-labelledby="promo-heading">
-      <div className="mx-auto grid max-w-[1200px] items-center gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-12 lg:py-20">
+      <div className="ss-container grid items-center gap-8 py-14 sm:py-16 lg:grid-cols-2 lg:gap-12 lg:py-20">
         <Link
           href={`/content/${promo.slug}`}
           className="press group relative block aspect-video w-full overflow-hidden rounded-xl bg-ink-3"
@@ -221,7 +227,7 @@ async function PromoBand() {
 function PromoSkeleton() {
   return (
     <div className="bg-ink" aria-hidden>
-      <div className="mx-auto grid max-w-[1200px] items-center gap-8 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-12 lg:py-20">
+      <div className="ss-container grid items-center gap-8 py-14 sm:py-16 lg:grid-cols-2 lg:gap-12 lg:py-20">
         <div
           className="w-full animate-pulse rounded-xl bg-ink-3"
           style={{ aspectRatio: "16 / 9" }}
@@ -264,7 +270,7 @@ export default function HomePage() {
 
       <div className="bg-surface">
         {/* ============ newest across the catalogue — the head carousel ============ */}
-        <div className="mx-auto max-w-[1200px] px-4 pt-8 sm:px-6 sm:pt-10">
+        <div className="ss-container pt-8 sm:pt-10">
           {/* suppressHydrationWarning: ScrollReveal marks this wrapper
               visible before its streamed content hydrates. */}
           <div className="ss-reveal" ss-reveal="" suppressHydrationWarning>
@@ -294,7 +300,7 @@ export default function HomePage() {
         </div>
 
         {/* ============ CTA #1 ============ */}
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <div className="ss-container">
           <CenteredCta
             id="film-anak"
             heading="Film Terbaik untuk Anak"
@@ -317,7 +323,7 @@ export default function HomePage() {
             backgroundPosition: "center",
           }}
         >
-          <div className="mx-auto max-w-[1200px] px-4 pb-0 pt-16 sm:px-6 sm:pt-24">
+          <div className="ss-container pb-0 pt-16 sm:pt-24">
             <div className="mx-auto max-w-[760px] text-center">
               <h1
                 id="home-search"
@@ -345,7 +351,7 @@ export default function HomePage() {
         </section>
 
         {/* ============ CTA #2 ============ */}
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
+        <div className="ss-container">
           <CenteredCta
             id="game-anak"
             heading="Game"

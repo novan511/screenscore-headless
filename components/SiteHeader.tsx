@@ -11,7 +11,7 @@ const SECONDARY = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-[#fefefe] text-ink">
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 sm:px-6 sm:h-[88px]">
+      <div className="ss-container flex h-16 items-center gap-6 sm:h-[88px]">
         <Link href="/" className="inline-flex min-h-11 shrink-0 items-center text-2xl font-extrabold tracking-tight" aria-label="ScreenScore — beranda">
           <span className="text-ink">screen</span>
           <span className="text-pink">score</span>
@@ -22,7 +22,7 @@ export function SiteHeader() {
             <Link
               key={c.slug}
               href={c.path}
-              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink"
+              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink-600"
             >
               {c.name}
             </Link>
@@ -31,7 +31,7 @@ export function SiteHeader() {
             <Link
               key={s.href}
               href={s.href}
-              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink"
+              className="rounded-md px-2.5 py-2 text-sm font-semibold text-ink/75 transition hover:bg-blush hover:text-pink-600"
             >
               {s.label}
             </Link>
@@ -39,27 +39,27 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden w-64 md:block">
-          <SearchForm />
+          <SearchForm id="q-header" />
         </div>
 
         {/* mobile: CSS-only menu */}
         <details className="relative ml-auto lg:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-ink/80 transition hover:bg-blush hover:text-pink">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-ink/80 transition hover:bg-blush hover:text-pink-600">
             <span aria-hidden className="menu-bars">
               ☰
             </span>
-            Menu
+            <span className="sr-only">Menu</span>
           </summary>
           <div className="menu-panel absolute right-0 top-full mt-2 max-h-[70vh] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-line bg-white p-4 shadow-2xl">
             <div className="mb-3">
-              <SearchForm />
+              <SearchForm id="q-menu" />
             </div>
             <ul className="space-y-1">
               {CATEGORY_LIST.map((c) => (
                 <li key={c.slug}>
                   <Link
                     href={c.path}
-                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink"
+                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink-600"
                   >
                     {c.name}
                   </Link>
@@ -69,7 +69,7 @@ export function SiteHeader() {
                 <li key={s.href}>
                   <Link
                     href={s.href}
-                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink"
+                    className="block rounded-lg px-3 py-3 text-sm font-semibold hover:bg-blush hover:text-pink-600"
                   >
                     {s.label}
                   </Link>

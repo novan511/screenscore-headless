@@ -57,7 +57,7 @@ export function HomeFaq() {
                     {item.q}
                     <span
                       aria-hidden
-                      className="mt-0.5 shrink-0 text-pink transition-transform duration-200 group-open:rotate-90"
+                      className="mt-0.5 shrink-0 text-pink-600 transition-transform duration-200 group-open:rotate-90"
                     >
                       ▸
                     </span>

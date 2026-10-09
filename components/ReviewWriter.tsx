@@ -202,7 +202,7 @@ export function ReviewWriter({
 
           {starFields.length > 0 && (
             <fieldset className="rounded-xl border border-line bg-canvas p-4">
-              <legend className="px-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink">
+              <legend className="px-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-pink-600">
                 Penilaian
               </legend>
               <div className="mt-1.5 space-y-2">
@@ -237,21 +237,23 @@ export function ReviewWriter({
   }
 
   /* ---------------- guest gate (default) ---------------- */
+  /* Mirrors the reviewflow box on the legacy page: 640px dashed card,
+     centered copy, lime Login + outlined Daftar. */
   return (
-    <div className="mx-auto max-w-[42rem] rounded-lg border border-dashed border-line bg-white px-6 py-7 text-center">
-      <p className="text-sm leading-relaxed text-muted">
-        Silahkan login atau daftar untuk memberikan review.
+    <div className="w-full max-w-[640px] rounded-xl border-2 border-dashed border-[#e0e0e0] bg-[#f8f8f8] px-5 py-10 text-center">
+      <p className="text-[15px] leading-[1.6] text-[#666]">
+        Silakan login atau daftar untuk memberikan review.
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-3">
         <a
           href={loginUrl}
-          className="press rounded bg-yellow px-5 py-1.5 text-sm font-bold text-ink hover:bg-yellow-600"
+          className="press rounded-lg border-2 border-[#f8ff00] bg-[#f8ff00] px-6 py-2.5 text-sm font-semibold leading-[25.6px] text-[#1a1a1a] hover:border-[#d4db00] hover:bg-[#d4db00]"
         >
           Login
         </a>
         <a
           href={registerUrl}
-          className="press rounded border border-pink bg-white px-5 py-1.5 text-sm font-bold text-pink hover:bg-blush"
+          className="press rounded-lg border-2 border-[#f8ff00] px-6 py-2.5 text-sm font-semibold leading-[25.6px] text-muted hover:bg-[#fcff4d]"
         >
           Daftar
         </a>

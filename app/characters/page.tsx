@@ -18,7 +18,7 @@ export default async function CharactersPage() {
   const people = data?.items ?? [];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+    <div className="ss-container py-10">
       <h1 className="text-3xl font-extrabold sm:text-4xl">Karakter</h1>
       <p className="mt-1.5 text-sm text-muted">
         Tokoh-tokoh yang dikenal anak-anak.
@@ -47,7 +47,7 @@ export default async function CharactersPage() {
                     />
                   )}
                 </div>
-                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink">
+                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink-600">
                   {p.title}
                 </p>
               </Link>

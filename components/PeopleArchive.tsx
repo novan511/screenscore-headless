@@ -34,7 +34,7 @@ export async function PeopleArchive({
   const people = data?.items ?? [];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+    <div className="ss-container py-10">
       <h1 className="text-3xl font-extrabold sm:text-4xl">{title}</h1>
       <p className="mt-1.5 max-w-2xl text-sm text-muted">{blurb}</p>
 
@@ -62,7 +62,7 @@ export async function PeopleArchive({
                     />
                   )}
                 </div>
-                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink">
+                <p className="mt-2 line-clamp-2 text-sm font-bold group-hover:text-pink-600">
                   {p.title}
                 </p>
               </Link>
@@ -73,7 +73,7 @@ export async function PeopleArchive({
             <nav className="mt-10 flex justify-center" aria-label="Paginasi">
               <Link
                 href={`${routeBase}?after=${encodeURIComponent(data.endCursor)}`}
-                className="press inline-flex min-h-11 items-center rounded-full border border-line bg-white px-6 text-sm font-extrabold text-ink hover:border-pink hover:text-pink"
+                className="press inline-flex min-h-11 items-center rounded-full border border-line bg-white px-6 text-sm font-extrabold text-ink hover:border-pink hover:text-pink-600"
               >
                 Muat lebih banyak →
               </Link>

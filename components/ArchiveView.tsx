@@ -29,7 +29,7 @@ export async function ArchiveView({
   });
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+    <div className="ss-container py-10">
       {/* suppressHydrationWarning: ScrollReveal sets data-ss-reveal before
           this streamed segment hydrates — React never renders that attribute,
           so there is nothing to patch up. */}
@@ -54,7 +54,7 @@ export async function ArchiveView({
           {age && (
             <a
               href={category.path}
-              className="mt-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink hover:underline"
+              className="mt-3 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink-600 hover:underline"
             >
               Lihat semua {category.name} →
             </a>

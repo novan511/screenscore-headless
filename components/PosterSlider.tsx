@@ -442,7 +442,7 @@ export function PosterSlider({
             "absolute top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 place-items-center",
             "rounded-full bg-white/95 text-ink opacity-0 ring-1 ring-line",
             "shadow-[0_4px_16px_rgba(33,33,33,0.16)] transition duration-200",
-            "hover:text-pink hover:ring-pink focus-visible:opacity-100",
+            "hover:text-pink-600 hover:ring-pink focus-visible:opacity-100",
             "group-hover/sl:opacity-100 sm:grid",
             side === "prev" ? "left-1.5" : "right-1.5",
           ].join(" ")}

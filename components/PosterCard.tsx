@@ -71,7 +71,9 @@ export function PosterCard({
         )}
 
         {age && (
-          <span className="absolute left-1.5 top-1.5 rounded-full bg-pink px-2 py-0.5 text-[11px] font-bold text-white">
+          /* pink-600 rather than pink: white on #f2187c is 4.04:1, which
+             fails AA for the 11px label carried by every poster card. */
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-pink-600 px-2 py-0.5 text-[11px] font-bold text-white">
             {age}
           </span>
         )}
@@ -84,7 +86,7 @@ export function PosterCard({
       </div>
 
       <div className="mt-2">
-        <p className="line-clamp-2 text-sm font-bold leading-snug group-hover:text-pink">
+        <p className="line-clamp-2 text-sm font-bold leading-snug group-hover:text-pink-600">
           {title.name}
         </p>
         <div className="mt-1 flex items-center justify-between gap-2">

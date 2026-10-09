@@ -53,13 +53,13 @@ export function ArticleCard({
           {post.category?.name ?? "Artikel"}
         </span>
         {fresh && (
-          <span className="rounded-full bg-pink px-2 py-0.5 text-[10px] font-extrabold uppercase text-white">
+          <span className="rounded-full bg-pink-600 px-2 py-0.5 text-[10px] font-extrabold uppercase text-white">
             Baru
           </span>
         )}
       </div>
 
-      <h3 className="mt-3 line-clamp-2 text-base font-extrabold leading-snug text-ink transition-colors group-hover:text-pink sm:text-lg">
+      <h3 className="mt-3 line-clamp-2 text-base font-extrabold leading-snug text-ink transition-colors group-hover:text-pink-600 sm:text-lg">
         {post.title}
       </h3>
 
@@ -73,7 +73,7 @@ export function ArticleCard({
         <time dateTime={post.date}>{DATE_FMT.format(published)}</time>
         <span
           aria-hidden
-          className="text-pink opacity-0 transition group-hover:opacity-100"
+          className="text-pink-600 opacity-0 transition group-hover:opacity-100"
         >
           Baca →
         </span>

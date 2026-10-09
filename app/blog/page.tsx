@@ -73,7 +73,7 @@ export default async function BlogPage({ searchParams }: Props) {
   const listUrl = (c: string) => (c === "semua" ? "/blog" : `/blog?cat=${c}`);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="ss-container py-10 sm:py-14">
       <JsonLd
         data={[
           {
@@ -118,7 +118,7 @@ export default async function BlogPage({ searchParams }: Props) {
       <nav aria-label="Breadcrumb" className="text-sm font-semibold text-muted">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
-            <Link href="/" className="hover:text-pink">
+            <Link href="/" className="hover:text-pink-600">
               Beranda
             </Link>
           </li>
@@ -146,8 +146,8 @@ export default async function BlogPage({ searchParams }: Props) {
             className={cx(
               "rounded-full px-4 py-2 text-xs font-bold text-ink transition",
               c.slug === cat
-                ? "bg-pink text-white"
-                : "bg-surface hover:bg-pink hover:text-white",
+                ? "bg-pink-600 text-white"
+                : "bg-surface hover:bg-pink-600 hover:text-white",
             )}
             aria-current={c.slug === cat ? "page" : undefined}
           >
@@ -162,7 +162,7 @@ export default async function BlogPage({ searchParams }: Props) {
             📭
           </p>
           <p className="mt-3 font-bold text-ink">Belum ada artikel di kategori ini.</p>
-          <Link href="/blog" className="mt-2 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink hover:underline">
+          <Link href="/blog" className="mt-2 inline-flex min-h-11 items-center rounded-md px-2 text-sm font-bold text-pink-600 hover:underline">
             Lihat semua artikel →
           </Link>
         </div>

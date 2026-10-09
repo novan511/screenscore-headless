@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Jost } from "next/font/google";
 import "./globals.css";
 import { PageTransition } from "@/components/PageTransition";
+import { CloseMenusOnNavigate } from "@/components/CloseMenusOnNavigate";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -73,8 +74,22 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <ScrollReveal />
+        <CloseMenusOnNavigate />
+        {/*
+          Skip link. The header carries the logo, the search field and (below
+          `lg`) eight category links, so a keyboard user had to tab through
+          all of them on every page before reaching the content. Visually
+          hidden until focused, then pinned to the top-left — it must precede
+          the header in the DOM to be the first tab stop.
+        */}
+        <a
+          href="#konten"
+          className="sr-only rounded-md focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
+        >
+          Lompat ke konten utama
+        </a>
         <SiteHeader />
-        <main className="flex-1">
+        <main id="konten" tabIndex={-1} className="flex-1">
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />

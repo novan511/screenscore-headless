@@ -90,7 +90,7 @@ export default async function BlogPostPage({ params }: Props) {
   const description = post.excerpt || post.title;
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="ss-container py-10 sm:py-14">
       <JsonLd
         data={[
           {
@@ -142,13 +142,13 @@ export default async function BlogPostPage({ params }: Props) {
           <nav aria-label="Breadcrumb" className="mt-3 text-sm text-muted">
             <ol className="flex flex-wrap items-center gap-1.5">
               <li>
-                <Link href="/" className="hover:text-pink">
+                <Link href="/" className="hover:text-pink-600">
                   Home
                 </Link>
               </li>
               <li aria-hidden>»</li>
               <li>
-                <Link href="/blog" className="hover:text-pink">
+                <Link href="/blog" className="hover:text-pink-600">
                   Blog
                 </Link>
               </li>
@@ -235,7 +235,7 @@ export default async function BlogPostPage({ params }: Props) {
               Kategori :{" "}
               <Link
                 href={`/blog?cat=${post.category.slug}`}
-                className="font-semibold text-ink hover:text-pink"
+                className="font-semibold text-ink hover:text-pink-600"
               >
                 {post.category.name}
               </Link>
@@ -300,7 +300,7 @@ export default async function BlogPostPage({ params }: Props) {
                 {related.slice(0, 4).map((p) => (
                   <li key={p.id}>
                     <Link href={p.path} className="group block">
-                      <p className="text-[15px] font-bold leading-snug text-ink transition group-hover:text-pink">
+                      <p className="text-[15px] font-bold leading-snug text-ink transition group-hover:text-pink-600">
                         {p.title}
                       </p>
                       <p className="mt-1 line-clamp-2 text-sm text-muted">

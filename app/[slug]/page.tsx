@@ -88,7 +88,7 @@ export default async function StaticPage({ params }: Props) {
         {page.title}
       </h1>
       <nav className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted">
-        <Link href="/" className="transition hover:text-pink">
+        <Link href="/" className="transition hover:text-pink-600">
           Beranda
         </Link>
         <span aria-hidden>/</span>

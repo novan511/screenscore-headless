@@ -17,7 +17,7 @@ export default function Loading() {
       role="status"
       aria-busy="true"
       aria-label="Memuat halaman…"
-      className="mx-auto min-h-screen w-full max-w-[1200px] px-4 py-10 sm:px-6"
+      className="ss-container min-h-screen py-10"
     >
       <div className="h-9 w-2/3 max-w-lg animate-pulse rounded bg-surface" />
       <div className="mt-4 h-4 w-40 animate-pulse rounded bg-surface" />

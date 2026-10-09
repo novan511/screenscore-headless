@@ -25,7 +25,7 @@ export function RatingStars({
         <span className="text-line">{"★".repeat(5 - full)}</span>
       </span>
       <span className="tabular text-xs font-bold text-muted">
-        {value % 1 === 0 ? value.toFixed(1) : value.toFixed(1)}
+        {value.toFixed(1)}
         {typeof count === "number" && count > 0 && (
           <span className="font-medium"> ({count})</span>
         )}
