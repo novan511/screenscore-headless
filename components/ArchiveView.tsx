@@ -1,6 +1,8 @@
 import { AgeChips } from "@/components/AgeChips";
+import { JsonLd } from "@/components/JsonLd";
 import { Pagination } from "@/components/Pagination";
 import { PosterCard, TitleGrid } from "@/components/PosterCard";
+import { SITE, siteUrl } from "@/lib/config";
 import type { CategoryConfig } from "@/lib/config";
 import { fetchTitles } from "@/lib/store";
 
@@ -28,8 +30,59 @@ export async function ArchiveView({
     order: "desc",
   });
 
+  /*
+   * Structured data for the archive.
+   *
+   * These five category pages carry the site's main internal-linking hubs and
+   * were emitting no JSON-LD at all. `ItemList` is the part that matters: it
+   * turns the visible grid into a machine-readable ranked list of titles,
+   * which is what both Google's rich results and AI answer engines read when
+   * asked "what films are there for kids" — without it, the grid is only
+   * pixels. `CollectionPage` types the page itself so the list has a parent.
+   */
+  const canonical = age ? category.path : page > 1 ? `${category.path}?page=${page}` : category.path;
+
   return (
-    <div className="ss-container py-10">
+    <>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: page > 1 ? `${category.name} — Halaman ${page}` : category.name,
+            description: category.blurb,
+            url: siteUrl(canonical),
+            isPartOf: { "@type": "WebSite", name: SITE.name, url: siteUrl("/") },
+            inLanguage: "id",
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: data.items.length,
+              itemListOrder: "https://schema.org/ItemListOrderDescending",
+              itemListElement: data.items.map((t, i) => ({
+                "@type": "ListItem",
+                position: (page - 1) * 16 + i + 1,
+                name: t.name,
+                url: siteUrl(`/content/${t.slug}`),
+              })),
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Beranda", item: siteUrl("/") },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: category.name,
+                item: siteUrl(category.path),
+              },
+            ],
+          },
+        ]}
+      />
+
+      <div className="ss-container py-10">
       {/* suppressHydrationWarning: ScrollReveal sets data-ss-reveal before
           this streamed segment hydrates — React never renders that attribute,
           so there is nothing to patch up. */}
@@ -74,6 +127,7 @@ export async function ArchiveView({
         basePath={category.path}
         query={age ? { age } : {}}
       />
-    </div>
+      </div>
+    </>
   );
 }

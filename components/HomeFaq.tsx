@@ -3,6 +3,8 @@
  * kept as native <details> so it works without JS and still reads as the
  * same design: light panel, bold question, pink caret.
  */
+import { JsonLd } from "@/components/JsonLd";
+
 const QUESTIONS = [
   {
     q: "Apakah saya bisa memberi review ?",
@@ -35,6 +37,27 @@ export function HomeFaq() {
       className="bg-white py-16 sm:py-20"
       aria-labelledby="faq-heading"
     >
+      {/*
+        FAQPage schema.
+        These five Q&A pairs were rendered as plain <details> with no
+        structured data, so the answers existed only for a human reader. This
+        is the single cheapest AEO win available: the same answers become
+        eligible for "People also ask" and for AI assistants that quote a
+        direct answer. Each question already follows the natural-language
+        phrasing an answer engine looks for.
+      */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          inLanguage: "id",
+          mainEntity: QUESTIONS.map((q) => ({
+            "@type": "Question",
+            name: q.q,
+            acceptedAnswer: { "@type": "Answer", text: q.a },
+          })),
+        }}
+      />
       <div className="mx-auto max-w-[1000px] px-4 sm:px-6">
         <div className="text-center">
           <h2

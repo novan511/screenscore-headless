@@ -208,6 +208,19 @@ export default async function TitlePage({ params }: Props) {
           },
         }),
       },
+      /*
+       * E-E-A-T: "About Writer" is printed at the foot of this page, so the
+       * named editor is declared as a Person here too. `Review.author`
+       * deliberately stays the Organization — Google expects a brand or a
+       * person there, and the byline above it carries the person.
+       */
+      {
+        "@type": "Person",
+        "@id": siteUrl("/#author"),
+        name: SITE_AUTHOR.name,
+        description: SITE_AUTHOR.bio,
+        worksFor: { "@type": "Organization", name: SITE.name },
+      },
     ],
   };
 

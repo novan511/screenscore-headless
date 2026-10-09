@@ -6,7 +6,8 @@ import { ignoreMissing, isUpstreamError } from "@/lib/http";
 import { fetchPageSeo } from "@/lib/bridge";
 import { fetchPostDetail } from "@/lib/blog";
 import { sanitizeWpHtml, metaDescription } from "@/lib/utils";
-import { SITE } from "@/lib/config";
+import { SITE, siteUrl } from "@/lib/config";
+import { JsonLd } from "@/components/JsonLd";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -57,6 +58,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
+ * Slugs that answer "who is behind this site" — typed as `AboutPage` so a
+ * knowledge panel or an AI assistant has something to resolve against.
+ */
+const ABOUT_SLUGS = new Set(["tentang-kami", "contact", "biography"]);
+
+/**
  * Generic resolver for legacy static pages:
  * tentang-kami, contact, ajukan-judul-baru, register,
  * ketentuan-layanan-screenscore, privacy-policy, biography…
@@ -83,7 +90,26 @@ export default async function StaticPage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-[860px] px-4 py-10 sm:px-6 sm:py-14">
+    <>
+      {/*
+        Legacy static pages (Tentang Kami, Kontak, Ketentuan, Privasi…) carry
+        the site's trust and legal copy but shipped no structured data, so
+        `WebPage` had no declared type and nothing tied them to the brand
+        entity. `AboutPage` is used for the about/contact slugs because those
+        are the two an AI engine reads to answer "who runs this site".
+      */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": ABOUT_SLUGS.has(slug) ? "AboutPage" : "WebPage",
+          name: page.title,
+          url: siteUrl(`/${slug}`),
+          inLanguage: "id",
+          isPartOf: { "@type": "WebSite", name: SITE.name, url: siteUrl("/") },
+          about: { "@type": "Organization", name: SITE.name, url: siteUrl("/") },
+        }}
+      />
+      <div className="mx-auto max-w-[860px] px-4 py-10 sm:px-6 sm:py-14">
       <h1 className="text-[2rem] font-bold leading-[1.15] tracking-tight sm:text-[2.5rem]">
         {page.title}
       </h1>
@@ -99,6 +125,7 @@ export default async function StaticPage({ params }: Props) {
         className="article-prose mt-7"
         dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(page.content) }}
       />
-    </div>
+      </div>
+    </>
   );
 }

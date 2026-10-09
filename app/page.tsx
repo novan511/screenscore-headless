@@ -8,7 +8,7 @@ import { SliderSkeleton } from "@/components/SliderSkeleton";
 import { TitleRail } from "@/components/TitleRail";
 import { PosterSlider } from "@/components/PosterSlider";
 import { VideoFacade } from "@/components/VideoFacade";
-import { CATEGORIES, SITE, siteUrl } from "@/lib/config";
+import { CATEGORIES, CATEGORY_LIST, SITE, SITE_AUTHOR, siteUrl } from "@/lib/config";
 import { fetchLatest, fetchTitles } from "@/lib/store";
 import { catchUpstreamBuild } from "@/lib/http";
 import { toCard } from "@/lib/utils";
@@ -259,10 +259,38 @@ export default function HomePage() {
               potentialAction: siteSearchAction,
             },
             {
+              /*
+               * The brand entity. Kept deliberately factual: logo, description,
+               * language and the topics the site actually publishes about, so
+               * an AI engine resolving "what is ScreenScore" gets a
+               * self-contained answer. No `sameAs` is declared because the
+               * footer social links are still empty placeholders — inventing
+               * profile URLs would be a fabricated claim.
+               */
               "@type": "Organization",
+              "@id": siteUrl("/#organization"),
               name: SITE.name,
               url: siteUrl("/"),
-              description: SITE.tagline,
+              description:
+                "ScreenScore adalah situs review kurasi konten film, serial, game, e-book, dan aplikasi untuk anak, lengkap dengan rating usia dan skor keamanan dari editor.",
+              inLanguage: "id",
+              logo: {
+                "@type": "ImageObject",
+                url: siteUrl("/icon.svg"),
+              },
+              knowsAbout: CATEGORY_LIST.map((c) => c.name),
+            },
+            /*
+             * E-E-A-T: the byline printed on every article and every review.
+             * Naming a real person with a role is the strongest authorship
+             * signal a site without a staff page can send.
+             */
+            {
+              "@type": "Person",
+              "@id": siteUrl("/#author"),
+              name: SITE_AUTHOR.name,
+              description: SITE_AUTHOR.bio,
+              worksFor: { "@id": siteUrl("/#organization") },
             },
           ],
         }}
