@@ -287,15 +287,24 @@ export default async function TitlePage({ params }: Props) {
               </div>
 
               <div className="flex flex-col gap-6 sm:flex-row sm:gap-x-[30px]">
-                {/* poster — full-bleed on phones, the 184px gallery thumb
-                    inside the 330px column from sm up (x130 in the ref). */}
+                {/* Poster — full-bleed on phones, filling the 330px column
+                    from `sm` up.
+
+                    This used to be capped at a 184px "gallery thumb", which
+                    left 146px of dead space beside it and threw away most of
+                    the source resolution: sampling the catalogue, 11 of 12
+                    titles ship a 460–739px wide image, all of which were being
+                    shrunk to 184px. At full column width those render
+                    downscaled and crisp. The aspect ratio still comes from the
+                    real image, so the handful of portrait uploads (e.g. Anora,
+                    184×273) simply come out taller rather than being cropped. */}
                 {poster && (
                   /* self-start: hug the poster instead of stretching to the
                      full row height (the box would otherwise match the whole
                      right column). */
                   <div className="mt-5 shrink-0 self-start sm:mt-0 sm:w-[330px]">
                     <div
-                      className="relative w-full overflow-hidden rounded bg-white sm:w-[184px]"
+                      className="relative w-full overflow-hidden rounded bg-white"
                       style={{
                         aspectRatio: posterDims
                           ? `${posterDims.w} / ${posterDims.h}`
@@ -307,7 +316,10 @@ export default async function TitlePage({ params }: Props) {
                         alt={poster.alt || title.name}
                         fill
                         priority
-                        sizes="(max-width: 640px) 100vw, 184px"
+                        /* Must describe the real slot — the browser picks the
+                           srcset entry from this, and at 184px it could never
+                           choose anything below w=640. */
+                        sizes="(max-width: 640px) 100vw, 330px"
                         quality={75}
                         className="object-cover"
                       />

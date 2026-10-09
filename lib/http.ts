@@ -43,15 +43,23 @@ const MAX_ATTEMPTS = 3;
 const ATTEMPT_TIMEOUT_MS = 8_000;
 
 /**
- * Cap concurrent WordPress requests process-wide. Next prerenders every
- * static page at once during `vercel build`, and the sitemap alone fans out
- * to ~9 parallel paginated readers — from a faraway build region that burst
- * trips Cloudflare rate-limiting (429s), and the retries then pile onto an
- * already-slow origin until everything times out and the build fails.
- * Four lanes stay comfortably under the limit while barely slowing a cold
- * render (homepage: ~14 reads ≈ 4 waves).
+ * Cap concurrent WordPress requests process-wide.
+ *
+ * **During a build** Next prerenders every static page at once, and the
+ * sitemap alone fans out to ~9 parallel paginated readers — from a faraway
+ * build region that burst trips Cloudflare rate-limiting (429s), and the
+ * retries then pile onto an already-slow origin until everything times out
+ * and the build fails. Four lanes stay comfortably under the limit there.
+ *
+ * **At runtime this cap was pure added latency.** It applied to live traffic
+ * too, and a single page already issues more reads in parallel than four:
+ * `/search` fires six, so they were forced into two waves and the response
+ * streamed for ~6s instead of ~3s. Nothing fans out unboundedly per visitor
+ * — a page is one request — so runtime gets a ceiling high enough that a
+ * page's own reads all run at once.
  */
-const MAX_CONCURRENT = 4;
+const MAX_CONCURRENT =
+  process.env.NEXT_PHASE === "phase-production-build" ? 4 : 16;
 let inFlight = 0;
 const waiters: (() => void)[] = [];
 
