@@ -11,6 +11,7 @@ import { MemberReviews, ReviewsSkeleton } from "@/components/MemberReviews";
 import { JsonLd } from "@/components/JsonLd";
 import {
   fetchScreenScore,
+  fetchTitleSeo,
   fetchTrailer,
 } from "@/lib/bridge";
 import {
@@ -19,6 +20,7 @@ import {
   SITE,
   SITE_AUTHOR,
   WP_SITE,
+  productPermalink,
   siteUrl,
 } from "@/lib/config";
 import { fetchRelated, fetchTitleBySlug } from "@/lib/store";
@@ -44,32 +46,32 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  // Metadata must not add a second blocking WordPress request to navigation.
-  // The Store API already contains the title, excerpt and poster needed for a
-  // complete card/social preview. Yoast is additive and is intentionally
-  // omitted here: waiting for the rendered WP page made every cold detail
-  // navigation pay for an otherwise non-critical bridge request.
-  const title = await fetchTitleBySlug(slug);
+  // Keep Store API and Yoast metadata in parallel. React cache shares these
+  // reads with the page render, while preserving the complete SEO contract.
+  const [title, seo] = await Promise.all([
+    fetchTitleBySlug(slug),
+    fetchTitleSeo(productPermalink(slug)),
+  ]);
 
-  if (!title) {
+  if (!title && !seo) {
     return { title: "Judul tidak ditemukan", robots: { index: false } };
   }
 
   const path = `/content/${slug}`;
-  const name = title.name || slug;
+  const name = seo?.title || title?.name || slug;
   // Yoast ships an empty description for most products, and for the rest it
   // tends to repeat the title or open with a raw WP block label ("Sinopsis
   // Lengkap  Mayor Tom Loftis…"). Clean the label, clamp to a SERP-sized
   // snippet, and fall back to the excerpt.
   const description =
-    metaDescription(undefined, name) ||
-    (title.excerpt ? clamp(title.excerpt, 155) : undefined);
-  const image = title.images[0]?.src;
+    metaDescription(seo?.description, name) ||
+    (title?.excerpt ? clamp(title.excerpt, 155) : undefined);
+  const image = seo?.image || title?.images[0]?.src;
 
   return {
     // Yoast already appends the brand ("- Screen Score") — applying the
     // `%s · ScreenScore` template on top produced "…- Screen Score · ScreenScore".
-    title: title.name || slug,
+    title: seo?.title ? { absolute: seo.title } : title?.name || slug,
     description,
     alternates: { canonical: path },
     openGraph: {
@@ -123,12 +125,12 @@ export default async function TitlePage({ params }: Props) {
   const category = title.categories[0];
   const isWatch = !!category && WATCH_CATEGORIES.has(category.slug);
 
-  // Games, books and apps never render a trailer. Avoiding this HTML bridge
-  // request removes a full origin round-trip from the most common detail
-  // pages. Watch pages still fetch score and trailer in parallel.
+  // Keep the trailer bridge for every product, as before. The player remains
+  // visible for watch categories, while loading it here preserves the cached
+  // trailer/HTML behaviour for any future category template.
   const [score, trailer] = await Promise.all([
     fetchScreenScore(title.permalink).catch(() => null),
-    isWatch ? fetchTrailer(title.permalink) : Promise.resolve(null),
+    fetchTrailer(title.permalink),
   ]);
 
   const poster = title.images[0];
