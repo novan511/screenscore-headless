@@ -113,9 +113,9 @@ function delay(ms: number): Promise<void> {
  */
 export async function wpFetch(
   url: string,
-  options: { revalidate?: number; accept?: string; init?: RequestInit } = {},
+  options: { revalidate?: number; tags?: string[]; accept?: string; init?: RequestInit } = {},
 ): Promise<Response> {
-  const { revalidate = SITE.revalidate, accept = "application/json", init } = options;
+  const { revalidate = SITE.revalidate, tags, accept = "application/json", init } = options;
 
   let lastError: unknown;
 
@@ -133,7 +133,7 @@ export async function wpFetch(
             ...init?.headers,
           },
           signal: init?.signal ?? AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
-          next: { revalidate },
+          next: { revalidate, ...(tags?.length ? { tags } : {}) },
         });
 
         if (RETRYABLE_STATUS.has(res.status)) {
@@ -187,8 +187,8 @@ export function catchUpstreamBuild<T>(fallback: T): (err: unknown) => T {
  * *same* WordPress page, so they share one download per request instead of
  * fetching the ~240KB document twice.
  */
-export const loadWpHtml = cache((url: string): Promise<string | null> =>
-  wpFetchHtml(url),
+export const loadWpHtml = cache((url: string, tags?: string[]): Promise<string | null> =>
+  wpFetchHtml(url, tags),
 );
 
 /**
@@ -196,8 +196,8 @@ export const loadWpHtml = cache((url: string): Promise<string | null> =>
  * Elementor bios). Returns null when the page simply does not exist so the
  * callers keep their "no data" behaviour, and throws only when WP is down.
  */
-export async function wpFetchHtml(url: string): Promise<string | null> {
-  const res = await wpFetch(url, { accept: "text/html" });
+export async function wpFetchHtml(url: string, tags?: string[]): Promise<string | null> {
+  const res = await wpFetch(url, { accept: "text/html", tags });
   if (res.status === 404) return null;
   if (!res.ok) {
     throw new UpstreamError(`Unexpected HTML status ${res.status} for ${url}`);

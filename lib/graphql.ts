@@ -14,6 +14,7 @@ export async function gql<T>(
 ): Promise<T> {
   const res = await wpFetch(ENDPOINTS.graphql, {
     revalidate: SITE.revalidate,
+    tags: ["graphql"],
     init: {
       method: "POST",
       headers: { "Content-Type": "application/json" },

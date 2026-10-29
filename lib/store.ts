@@ -48,7 +48,9 @@ export const fetchTitles = cache(
     if (params.orderby) qs.set("orderby", params.orderby);
     if (params.order) qs.set("order", params.order);
 
-    const res = await wpFetch(`${ENDPOINTS.store}/products?${qs}`);
+    const res = await wpFetch(`${ENDPOINTS.store}/products?${qs}`, {
+      tags: ["titles", `titles:list:${qs.toString()}`],
+    });
     // A bad filter/param is a programming error, not "no content".
     if (!res.ok) throw new Error(`Store API HTTP ${res.status}`);
 
@@ -73,6 +75,7 @@ export const fetchTitleBySlug = cache(
   async (slug: string): Promise<Title | null> => {
     const res = await wpFetch(
       `${ENDPOINTS.store}/products?slug=${encodeURIComponent(slug)}&per_page=1`,
+      { tags: ["titles", `title:${slug}`] },
     );
     if (!res.ok) {
       throw new UpstreamError(`Store API HTTP ${res.status} for slug=${slug}`);

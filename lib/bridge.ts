@@ -20,7 +20,7 @@ import type { PersonKind, ScreenScore, SeoMeta, Trailer } from "./types";
 export const fetchTitleSeo = cache(
   async (permalink: string): Promise<SeoMeta | null> => {
     try {
-      const html = await loadWpHtml(permalink);
+      const html = await loadWpHtml(permalink, [`seo:${permalink}`]);
       return html ? parseSeoFromHtml(html) : null;
     } catch {
       // SEO tags are additive — never fail the page over them.
@@ -35,6 +35,7 @@ export const fetchPageSeo = cache(
     try {
       const html = await loadWpHtml(
         `${WP_SITE}/${slug.replace(/^\/+|\/+$/g, "")}/`,
+        [`seo:page:${slug}`],
       );
       if (!html) return null;
       return parseSeoFromHtml(html);
@@ -69,7 +70,7 @@ function parseSeoFromHtml(html: string): SeoMeta | null {
 
 export async function fetchScreenScore(permalink: string): Promise<ScreenScore | null> {
   try {
-    const html = await loadWpHtml(permalink);
+    const html = await loadWpHtml(permalink, [`score:${permalink}`]);
     if (!html) return null;
     const root = parse(html);
     const card = root.querySelector(".reviewflow-container .rf-review-card");
@@ -119,7 +120,7 @@ export async function fetchScreenScore(permalink: string): Promise<ScreenScore |
 export const fetchTrailer = cache(
   async (permalink: string): Promise<Trailer | null> => {
     try {
-      const html = await loadWpHtml(permalink);
+      const html = await loadWpHtml(permalink, [`trailer:${permalink}`]);
       return html ? parseTrailer(html) : null;
     } catch {
       // A missing trailer is normal — never fail the page over it.
