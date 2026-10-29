@@ -25,10 +25,18 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Browser and crawler asset probes must never fall through to the WordPress
+// page/post resolver. `app/icon.svg` handles the canonical icon; these guards
+// keep legacy favicon probes cheap and avoid noisy upstream requests.
+function isAssetSlug(slug: string): boolean {
+  return /\.(?:ico|png|jpg|jpeg|gif|webp|svg|css|js|map|txt|xml)$/i.test(slug);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  if (isAssetSlug(slug)) return {};
   const [seo, page] = await Promise.all([
-    fetchPageSeo(slug),
+    fetchPageSeo(slug).catch(() => null),
     fetchStaticPage(slug).catch(ignoreMissing(null)),
   ]);
 
@@ -70,6 +78,7 @@ const ABOUT_SLUGS = new Set(["tentang-kami", "contact", "biography"]);
  */
 export default async function StaticPage({ params }: Props) {
   const { slug } = await params;
+  if (isAssetSlug(slug)) notFound();
   let page = null;
   try {
     page = await fetchStaticPage(slug);
