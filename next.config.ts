@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const WP_SITE = process.env.NEXT_PUBLIC_WP_SITE ?? "https://screenscore.digitalmama.id";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   images: {
     // WebP only: AVIF encodes ~10x slower, and on a cold `/_next/image` hit
     // (fresh deploy, new upload) that encode plus the already-slow upstream

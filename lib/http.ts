@@ -39,8 +39,18 @@ export function ignoreMissing<T>(fallback: T): (err: unknown) => T {
   };
 }
 
-const MAX_ATTEMPTS = 3;
-const ATTEMPT_TIMEOUT_MS = 8_000;
+const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
+
+/*
+ * Runtime pages must fail fast when WordPress/WooCommerce is slow.
+ *
+ * The previous 3 × 8s retry budget kept category pages on their skeleton UI
+ * for ~25s whenever the Store API timed out, which is the behaviour reported
+ * on /game and the other archives. During `next build` we still keep the old,
+ * more patient budget because prerendering should survive short origin blips.
+ */
+const MAX_ATTEMPTS = IS_BUILD ? 3 : 2;
+const ATTEMPT_TIMEOUT_MS = IS_BUILD ? 8_000 : 3_500;
 
 /**
  * Cap concurrent WordPress requests process-wide.
@@ -58,8 +68,7 @@ const ATTEMPT_TIMEOUT_MS = 8_000;
  * — a page is one request — so runtime gets a ceiling high enough that a
  * page's own reads all run at once.
  */
-const MAX_CONCURRENT =
-  process.env.NEXT_PHASE === "phase-production-build" ? 4 : 16;
+const MAX_CONCURRENT = IS_BUILD ? 4 : 16;
 let inFlight = 0;
 const waiters: (() => void)[] = [];
 
@@ -138,8 +147,9 @@ export async function wpFetch(
         lastError = err;
         if (attempt === MAX_ATTEMPTS) break;
       }
-      // Exponential-ish backoff: 250ms, 750ms — quick enough for a page render.
-      await delay(250 * attempt * 3);
+      // Runtime should show the error boundary quickly instead of leaving the
+      // visitor on a skeleton. Build keeps the older, gentler backoff.
+      await delay(IS_BUILD ? 250 * attempt * 3 : 200 * attempt);
     }
 
     throw new UpstreamError(`WordPress unreachable: ${url}`, { cause: lastError });
@@ -164,7 +174,7 @@ export function catchUpstreamBuild<T>(fallback: T): (err: unknown) => T {
   return (err: unknown): T => {
     if (
       isUpstreamError(err) &&
-      process.env.NEXT_PHASE === "phase-production-build"
+      IS_BUILD
     ) {
       return fallback;
     }
